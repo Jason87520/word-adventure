@@ -283,6 +283,7 @@
 
 		.feedback[data-state="correct"] { color: var(--green); }
 		.feedback[data-state="incorrect"] { color: var(--red); }
+		.next-button { width: 100%; margin-top: 4px; }
 
 		.card-foot {
 			display: flex;
@@ -406,6 +407,7 @@
 
 					<div class="options" id="options" role="group" aria-label="选择答案"></div>
 					<p class="feedback" id="feedback" data-state="idle" role="status" aria-live="polite">选一个你觉得正确的答案吧！</p>
+					<button class="primary-button next-button" id="next-button" type="button" hidden>下一题 →</button>
 					<div class="card-foot"><span>💡 答错也没关系，弄懂知识点就是胜利！</span><span>每轮 10 题</span></div>
 				</div>
 
@@ -536,11 +538,12 @@
 				{ unit: "unit4", prompt: "We both like ___.", answer: "singing", options: ["singing", "sing", "sings", "sang"], explanation: "like 后接动词-ing 表示喜欢做某事。" }
 			];
 			const QUESTION_COUNT = 10;
-			const state = { exercise: "words", mode: "en-zh", category: "all", questions: [], index: 0, score: 0, correct: 0, streak: 0, answered: false, advanceTimer: null };
+			const state = { exercise: "words", mode: "en-zh", category: "all", questions: [], index: 0, score: 0, correct: 0, streak: 0, answered: false };
 			const quizScreen = document.querySelector("#quiz-screen");
 			const resultScreen = document.querySelector("#result-screen");
 			const optionsElement = document.querySelector("#options");
 			const feedback = document.querySelector("#feedback");
+			const nextButton = document.querySelector("#next-button");
 			const speakButton = document.querySelector("#speak-button");
 			const progress = document.querySelector(".progress-track");
 			const languageSwitch = document.querySelector("#language-switch");
@@ -560,8 +563,6 @@
 			}
 
 			function startGame() {
-				window.clearTimeout(state.advanceTimer);
-				state.advanceTimer = null;
 				const pool = currentPool();
 				if (pool.length < QUESTION_COUNT) {
 					feedback.textContent = "这个单元的题目还不够多，请选择 Unit 1–4 综合。";
@@ -601,6 +602,7 @@
 				speakButton.hidden = !isVocabulary || !("speechSynthesis" in window);
 				feedback.textContent = "选一个你觉得正确的答案吧！";
 				feedback.dataset.state = "idle";
+				nextButton.hidden = true;
 				state.answered = false;
 				progress.setAttribute("aria-valuenow", String(state.index));
 				document.querySelector("#progress-fill").style.width = `${(state.index / QUESTION_COUNT) * 100}%`;
@@ -654,12 +656,16 @@
 					feedback.dataset.state = "incorrect";
 				}
 
-				state.advanceTimer = window.setTimeout(() => {
-					state.advanceTimer = null;
-					state.index += 1;
-					if (state.index === QUESTION_COUNT) showResults();
-					else renderQuestion();
-				}, 1100);
+				nextButton.textContent = state.index === QUESTION_COUNT - 1 ? "查看成绩 →" : "下一题 →";
+				nextButton.hidden = false;
+				nextButton.focus();
+			}
+
+			function advanceQuestion() {
+				if (!state.answered) return;
+				state.index += 1;
+				if (state.index === QUESTION_COUNT) showResults();
+				else renderQuestion();
 			}
 
 			function showResults() {
@@ -707,6 +713,7 @@
 				state.category = event.target.value;
 				startGame();
 			});
+			nextButton.addEventListener("click", advanceQuestion);
 			document.querySelector("#replay-button").addEventListener("click", startGame);
 			document.querySelector("#review-button").addEventListener("click", () => {
 				state.category = "all";
