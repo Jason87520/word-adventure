@@ -167,6 +167,21 @@
 			box-shadow: 0 2px 7px rgba(45, 50, 80, .1);
 		}
 
+		.mistake-book-button {
+			min-height: 36px;
+			padding: 0 12px;
+			border: 1px solid #f0dfb8;
+			border-radius: 11px;
+			background: #fffaf0;
+			color: #88621d;
+			cursor: pointer;
+			font-size: 11px;
+			font-weight: 900;
+			white-space: nowrap;
+		}
+
+		.mistake-book-button:hover { border-color: #e8c86f; background: #fff5dc; }
+
 		.category-select {
 			max-width: 145px;
 			padding: 9px 28px 9px 11px;
@@ -284,6 +299,18 @@
 		.feedback[data-state="correct"] { color: var(--green); }
 		.feedback[data-state="incorrect"] { color: var(--red); }
 		.next-button { width: 100%; margin-top: 4px; }
+		.storage-notice { margin: 10px 0 0; color: var(--red); font-size: 11px; line-height: 1.6; }
+
+		#mistake-screen { padding: 8px 0; }
+		.mistake-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+		.mistake-head h2 { margin: 0; font-size: 22px; }
+		.mistake-summary { margin: 7px 0 16px; color: var(--muted); font-size: 12px; line-height: 1.7; }
+		.mistake-list { display: grid; gap: 9px; max-height: 360px; overflow-y: auto; margin: 0; padding: 0 3px 0 0; list-style: none; }
+		.mistake-item { padding: 12px 13px; border: 1px solid var(--line); border-radius: 13px; background: #fcfcff; }
+		.mistake-item strong { display: block; font-size: 13px; line-height: 1.6; overflow-wrap: anywhere; }
+		.mistake-item p { margin: 4px 0 0; color: var(--muted); font-size: 11px; line-height: 1.6; overflow-wrap: anywhere; }
+		.mistake-empty { padding: 28px 14px; border-radius: 14px; background: #f8f6ff; color: var(--muted); font-size: 13px; line-height: 1.8; text-align: center; }
+		.mistake-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 9px; margin-top: 16px; }
 
 		.card-foot {
 			display: flex;
@@ -373,7 +400,9 @@
 						<div class="mode-switch" role="group" aria-label="选择练习内容">
 							<button class="mode-button" type="button" data-exercise="words" aria-pressed="true">📖 词汇</button>
 							<button class="mode-button" type="button" data-exercise="grammar" aria-pressed="false">✏️ 语法</button>
+							<button class="mode-button" type="button" data-exercise="mistakes" aria-pressed="false">📕 错题练习</button>
 						</div>
+						<button class="mistake-book-button" id="open-mistakes-button" type="button">📒 错题本 <span id="mistake-count">0</span></button>
 						<div class="mode-switch" id="language-switch" role="group" aria-label="选择练习方向">
 							<button class="mode-button" type="button" data-mode="en-zh" aria-pressed="true">🇬🇧 英译中</button>
 							<button class="mode-button" type="button" data-mode="zh-en" aria-pressed="false">🇨🇳 中译英</button>
@@ -408,7 +437,18 @@
 					<div class="options" id="options" role="group" aria-label="选择答案"></div>
 					<p class="feedback" id="feedback" data-state="idle" role="status" aria-live="polite">选一个你觉得正确的答案吧！</p>
 					<button class="primary-button next-button" id="next-button" type="button" hidden>下一题 →</button>
-					<div class="card-foot"><span>💡 答错也没关系，弄懂知识点就是胜利！</span><span>每轮 10 题</span></div>
+					<div class="card-foot"><span>💡 答错也没关系，弄懂知识点就是胜利！</span><span id="round-size-label">每轮 10 题</span></div>
+				</div>
+
+				<div id="mistake-screen" hidden>
+					<div class="mistake-head">
+						<div><h2>📒 我的错题本</h2><p class="mistake-summary" id="mistake-summary"></p></div>
+					</div>
+					<ul class="mistake-list" id="mistake-list"></ul>
+					<div class="mistake-actions">
+						<button class="primary-button" id="practice-mistakes-button" type="button">📕 开始错题练习</button>
+						<button class="secondary-button" id="back-to-game-button" type="button">返回单词练习</button>
+					</div>
 				</div>
 
 				<div id="result-screen" hidden>
@@ -421,6 +461,7 @@
 						<button class="secondary-button" id="review-button" type="button">📚 换个主题</button>
 					</div>
 				</div>
+				<p class="storage-notice" id="storage-notice" role="alert" hidden></p>
 			</section>
 		</main>
 		<footer><span>译林版五年级上册 · Unit 1–4 暂定词汇与语法</span><span>加油，你已经很棒啦！ 🌟</span></footer>
@@ -538,8 +579,10 @@
 				{ unit: "unit4", prompt: "We both like ___.", answer: "singing", options: ["singing", "sing", "sings", "sang"], explanation: "like 后接动词-ing 表示喜欢做某事。" }
 			];
 			const QUESTION_COUNT = 10;
-			const state = { exercise: "words", mode: "en-zh", category: "all", questions: [], index: 0, score: 0, correct: 0, streak: 0, answered: false };
+			const STORAGE_KEY = "word-adventure-mistakes-v1";
+			const state = { exercise: "words", mode: "en-zh", category: "all", questions: [], index: 0, roundCount: QUESTION_COUNT, score: 0, correct: 0, streak: 0, answered: false, mistakes: [] };
 			const quizScreen = document.querySelector("#quiz-screen");
+			const mistakeScreen = document.querySelector("#mistake-screen");
 			const resultScreen = document.querySelector("#result-screen");
 			const optionsElement = document.querySelector("#options");
 			const feedback = document.querySelector("#feedback");
@@ -547,6 +590,139 @@
 			const speakButton = document.querySelector("#speak-button");
 			const progress = document.querySelector(".progress-track");
 			const languageSwitch = document.querySelector("#language-switch");
+			const mistakeCount = document.querySelector("#mistake-count");
+			const storageNotice = document.querySelector("#storage-notice");
+
+			function questionKey(type, question) {
+				return type === "words"
+					? `word:${question.en.toLocaleLowerCase()}`
+					: `grammar:${question.unit}:${question.prompt}`;
+			}
+
+			function updateMistakeCount() {
+				mistakeCount.textContent = String(state.mistakes.length);
+			}
+
+			function persistMistakes() {
+				try {
+					window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state.mistakes));
+					storageNotice.hidden = true;
+					storageNotice.textContent = "";
+				} catch (error) {
+					console.error("Could not save the mistake book to this browser.", error);
+					storageNotice.textContent = "错题无法保存在此浏览器中。请检查浏览器的本地存储设置；本次练习仍可继续。";
+					storageNotice.hidden = false;
+				}
+				updateMistakeCount();
+			}
+
+			function loadMistakes() {
+				try {
+					const saved = window.localStorage.getItem(STORAGE_KEY);
+					if (saved === null) return;
+					const parsed = JSON.parse(saved);
+					if (!Array.isArray(parsed)) throw new TypeError("Saved mistake book must be an array.");
+					const validEntries = parsed.flatMap((entry) => {
+						if (!entry || !entry.question || !Number.isInteger(entry.wrongCount) || entry.wrongCount < 1) return [];
+						let question;
+						if (entry.type === "words" && typeof entry.question.en === "string") {
+							question = WORDS.find((word) => word.en.toLocaleLowerCase() === entry.question.en.toLocaleLowerCase());
+						} else if (entry.type === "grammar" && typeof entry.question.prompt === "string") {
+							question = GRAMMAR_QUESTIONS.find((item) => item.unit === entry.question.unit && item.prompt === entry.question.prompt);
+						}
+						return question ? [{
+							id: questionKey(entry.type, question),
+							type: entry.type,
+							question,
+							wrongCount: entry.wrongCount,
+							lastWrongAt: typeof entry.lastWrongAt === "string" ? entry.lastWrongAt : ""
+						}] : [];
+					});
+					const uniqueEntries = new Map();
+					validEntries.forEach((entry) => {
+						const existing = uniqueEntries.get(entry.id);
+						if (!existing || entry.wrongCount > existing.wrongCount) uniqueEntries.set(entry.id, entry);
+					});
+					state.mistakes = [...uniqueEntries.values()];
+					if (state.mistakes.length !== parsed.length) {
+						console.warn("Invalid saved mistake-book entries were ignored.");
+						persistMistakes();
+					} else {
+						updateMistakeCount();
+					}
+				} catch (error) {
+					console.error("Could not load the mistake book from this browser.", error);
+					state.mistakes = [];
+					storageNotice.textContent = "无法读取已保存的错题。请检查浏览器存储设置；本次练习仍可继续。";
+					storageNotice.hidden = false;
+				}
+			}
+
+			function recordMistake(type, question) {
+				const id = questionKey(type, question);
+				const existing = state.mistakes.find((entry) => entry.id === id);
+				if (existing) {
+					existing.wrongCount += 1;
+					existing.lastWrongAt = new Date().toISOString();
+				} else {
+					state.mistakes.push({
+						id,
+						type,
+						question: { ...question },
+						wrongCount: 1,
+						lastWrongAt: new Date().toISOString()
+					});
+				}
+				persistMistakes();
+			}
+
+			function removeMistake(type, question) {
+				const id = questionKey(type, question);
+				const nextMistakes = state.mistakes.filter((entry) => entry.id !== id);
+				if (nextMistakes.length === state.mistakes.length) return;
+				state.mistakes = nextMistakes;
+				persistMistakes();
+			}
+
+			function renderMistakeBook() {
+				const list = document.querySelector("#mistake-list");
+				const summary = document.querySelector("#mistake-summary");
+				const practiceButton = document.querySelector("#practice-mistakes-button");
+				list.replaceChildren();
+				summary.textContent = state.mistakes.length
+					? `共 ${state.mistakes.length} 道错题，答错会继续记录；在错题练习中答对即可移出错题本。错题保存在这台设备的当前浏览器中。`
+					: "继续闯关，答错的题目会自动收集在这里。错题保存在这台设备的当前浏览器中。";
+				practiceButton.disabled = state.mistakes.length === 0;
+				if (!state.mistakes.length) {
+					const empty = document.createElement("li");
+					empty.className = "mistake-empty";
+					empty.textContent = "🎉 错题本空空的！完成词汇或语法练习后，答错的题目会自动收录。";
+					list.append(empty);
+					return;
+				}
+				state.mistakes.forEach((entry) => {
+					const item = document.createElement("li");
+					item.className = "mistake-item";
+					const title = document.createElement("strong");
+					const details = document.createElement("p");
+					if (entry.type === "words") {
+						title.textContent = state.mode === "en-zh" ? `${entry.question.en} — ${entry.question.zh}` : `${entry.question.zh} — ${entry.question.en}`;
+						details.textContent = `词汇 · Unit ${entry.question.unit.slice(-1)} · 错过 ${entry.wrongCount} 次`;
+					} else {
+						title.textContent = entry.question.prompt;
+						details.textContent = `语法 · Unit ${entry.question.unit.slice(-1)} · 答案：${entry.question.answer} · 错过 ${entry.wrongCount} 次`;
+					}
+					item.append(title, details);
+					list.append(item);
+				});
+			}
+
+			function showMistakeBook() {
+				quizScreen.hidden = true;
+				mistakeScreen.hidden = false;
+				resultScreen.hidden = true;
+				renderMistakeBook();
+			}
 
 			function shuffle(items) {
 				const result = [...items];
@@ -558,45 +734,59 @@
 			}
 
 			function currentPool() {
+				if (state.exercise === "mistakes") {
+					return shuffle(state.mistakes).map((entry) => ({ type: entry.type, question: entry.question }));
+				}
 				const source = state.exercise === "words" ? WORDS : GRAMMAR_QUESTIONS;
 				return state.category === "all" ? source : source.filter((question) => question.unit === state.category);
 			}
 
 			function startGame() {
 				const pool = currentPool();
-				if (pool.length < QUESTION_COUNT) {
+				if (!pool.length && state.exercise === "mistakes") {
+					showMistakeBook();
+					return;
+				}
+				if (state.exercise !== "mistakes" && pool.length < QUESTION_COUNT) {
 					feedback.textContent = "这个单元的题目还不够多，请选择 Unit 1–4 综合。";
 					return;
 				}
-				state.questions = shuffle(pool).slice(0, QUESTION_COUNT);
+				state.roundCount = Math.min(QUESTION_COUNT, pool.length);
+				state.questions = state.exercise === "mistakes"
+					? pool.slice(0, state.roundCount)
+					: shuffle(pool).slice(0, state.roundCount).map((question) => ({ type: state.exercise, question }));
 				state.index = 0;
 				state.score = 0;
 				state.correct = 0;
 				state.streak = 0;
 				state.answered = false;
 				document.querySelector("#score").textContent = "0";
+				document.querySelector("#round-size-label").textContent = `本轮 ${state.roundCount} 题`;
 				quizScreen.hidden = false;
+				mistakeScreen.hidden = true;
 				resultScreen.hidden = true;
-				languageSwitch.hidden = state.exercise !== "words";
-				document.querySelector("#question-hint").textContent = state.exercise === "grammar"
-					? "选择正确的单词或句子"
-					: state.mode === "en-zh" ? "选择正确的中文意思" : "选择正确的英文单词";
+				languageSwitch.hidden = state.exercise !== "words" && state.exercise !== "mistakes";
+				document.querySelector("#category-select").parentElement.hidden = state.exercise === "mistakes";
 				renderQuestion();
 			}
 
 			function renderQuestion() {
-				const question = state.questions[state.index];
-				const isVocabulary = state.exercise === "words";
+				const entry = state.questions[state.index];
+				const question = entry.question;
+				const isVocabulary = entry.type === "words";
 				const isEnglishPrompt = state.mode === "en-zh";
-				document.querySelector("#round-label").textContent = `第 ${state.index + 1} 题 · 共 ${QUESTION_COUNT} 题`;
+				document.querySelector("#round-label").textContent = `第 ${state.index + 1} 题 · 共 ${state.roundCount} 题`;
 				document.querySelector("#streak-label").textContent = `🔥 连对 ${state.streak} 题`;
 				document.querySelector("#question-label").textContent = isVocabulary
 					? isEnglishPrompt ? "这个单词是什么意思？" : "这个中文怎么说？"
-					: `语法小挑战 · Unit ${question.unit.slice(-1)}`;
+					: `${state.exercise === "mistakes" ? "错题复习" : "语法小挑战"} · Unit ${question.unit.slice(-1)}`;
 				const questionWord = document.querySelector("#question-word");
 				questionWord.textContent = isVocabulary
 					? isEnglishPrompt ? question.en : question.zh
 					: question.prompt;
+				document.querySelector("#question-hint").textContent = isVocabulary
+					? isEnglishPrompt ? "选择正确的中文意思" : "选择正确的英文单词"
+					: "选择正确的单词或句子";
 				questionWord.dataset.type = isVocabulary ? "vocabulary" : "grammar";
 				document.querySelector("#category-emoji").textContent = isVocabulary ? question.icon : "✏️";
 				speakButton.hidden = !isVocabulary || !("speechSynthesis" in window);
@@ -605,13 +795,13 @@
 				nextButton.hidden = true;
 				state.answered = false;
 				progress.setAttribute("aria-valuenow", String(state.index));
-				document.querySelector("#progress-fill").style.width = `${(state.index / QUESTION_COUNT) * 100}%`;
+				document.querySelector("#progress-fill").style.width = `${(state.index / state.roundCount) * 100}%`;
 
 				const answer = isVocabulary ? isEnglishPrompt ? question.zh : question.en : question.answer;
 				const choices = isVocabulary
 					? shuffle([
 						{ text: answer, correct: true },
-						...shuffle(currentPool().filter((candidate) => candidate !== question)).slice(0, 3)
+						...shuffle(WORDS.filter((candidate) => candidate.en !== question.en)).slice(0, 3)
 							.map((candidate) => ({ text: isEnglishPrompt ? candidate.zh : candidate.en, correct: false }))
 					])
 					: shuffle(question.options.map((text) => ({ text, correct: text === answer })));
@@ -621,17 +811,19 @@
 					button.type = "button";
 					button.className = "option-button";
 					button.textContent = choice.text;
-					button.addEventListener("click", () => chooseAnswer(button, choice.correct, question));
+					button.addEventListener("click", () => chooseAnswer(button, choice.correct, entry));
 					optionsElement.append(button);
 				});
 			}
 
-			function chooseAnswer(selectedButton, isCorrect, question) {
+			function chooseAnswer(selectedButton, isCorrect, entry) {
 				if (state.answered) return;
 				state.answered = true;
+				const question = entry.question;
+				const isVocabulary = entry.type === "words";
 				const buttons = [...optionsElement.querySelectorAll("button")];
 				buttons.forEach((button) => { button.disabled = true; });
-				const answer = state.exercise === "words"
+				const answer = isVocabulary
 					? state.mode === "en-zh" ? question.zh : question.en
 					: question.answer;
 				const correctButton = buttons.find((button) => button.textContent === answer);
@@ -644,19 +836,21 @@
 					state.score += points;
 					document.querySelector("#score").textContent = String(state.score);
 					document.querySelector("#streak-label").textContent = `🔥 连对 ${state.streak} 题`;
-					feedback.textContent = `太棒了！答对啦，获得 ${points} 分${state.streak > 1 ? "，连击奖励继续加油！" : "！"}${state.exercise === "grammar" ? ` ${question.explanation}` : ""}`;
+					feedback.textContent = `太棒了！答对啦，获得 ${points} 分${state.streak > 1 ? "，连击奖励继续加油！" : "！"}${!isVocabulary ? ` ${question.explanation}` : ""}`;
 					feedback.dataset.state = "correct";
+					if (state.exercise === "mistakes") removeMistake(entry.type, question);
 				} else {
 					selectedButton.classList.add("incorrect");
 					state.streak = 0;
 					document.querySelector("#streak-label").textContent = "🔥 连对 0 题";
-					feedback.textContent = state.exercise === "words"
+					feedback.textContent = isVocabulary
 						? `差一点点！正确答案是：${answer}`
 						: `差一点点！正确答案：${answer}。${question.explanation}`;
 					feedback.dataset.state = "incorrect";
+					recordMistake(entry.type, question);
 				}
 
-				nextButton.textContent = state.index === QUESTION_COUNT - 1 ? "查看成绩 →" : "下一题 →";
+				nextButton.textContent = state.index === state.roundCount - 1 ? "查看成绩 →" : "下一题 →";
 				nextButton.hidden = false;
 				nextButton.focus();
 			}
@@ -664,26 +858,36 @@
 			function advanceQuestion() {
 				if (!state.answered) return;
 				state.index += 1;
-				if (state.index === QUESTION_COUNT) showResults();
+				if (state.index === state.roundCount) showResults();
 				else renderQuestion();
 			}
 
 			function showResults() {
 				quizScreen.hidden = true;
+				mistakeScreen.hidden = true;
 				resultScreen.hidden = false;
-				progress.setAttribute("aria-valuenow", String(QUESTION_COUNT));
+				progress.setAttribute("aria-valuemax", String(state.roundCount));
+				progress.setAttribute("aria-valuenow", String(state.roundCount));
 				document.querySelector("#progress-fill").style.width = "100%";
 				document.querySelector("#final-score").textContent = String(state.score);
 				const correctCount = state.correct;
 				const title = correctCount >= 9 ? "太厉害啦，学习冠军！" : correctCount >= 6 ? "挑战成功，继续加油！" : "完成挑战，你真棒！";
 				document.querySelector("#result-title").textContent = title;
-				document.querySelector("#result-copy").textContent = `10 题里你答对了 ${correctCount} 题。每一次练习，都会让知识记得更牢！`;
+				document.querySelector("#result-copy").textContent = `${state.roundCount} 题里你答对了 ${correctCount} 题。每一次练习，都会让知识记得更牢！`;
 				document.querySelector("#result-emoji").textContent = correctCount >= 9 ? "🏆" : correctCount >= 6 ? "🚀" : "🌟";
+				document.querySelector("#replay-button").textContent = state.exercise === "mistakes" ? "🔄 再练错题" : "🔄 再玩一轮";
+				document.querySelector("#review-button").textContent = state.exercise === "mistakes" ? "📒 返回错题本" : "📚 换个主题";
+				document.querySelector("#replay-button").disabled = state.exercise === "mistakes" && state.mistakes.length === 0;
+				if (state.exercise === "mistakes") {
+					document.querySelector("#result-title").textContent = state.mistakes.length ? "错题复习完成！" : "错题清零，太棒了！";
+					document.querySelector("#result-copy").textContent = `本轮答对 ${correctCount} 题，错题本还剩 ${state.mistakes.length} 题。`;
+				}
 			}
 
 			speakButton.addEventListener("click", () => {
-				const word = state.questions[state.index];
-				if (state.exercise !== "words" || !word || !("speechSynthesis" in window)) return;
+				const entry = state.questions[state.index];
+				const word = entry && entry.question;
+				if (!entry || entry.type !== "words" || !word || !("speechSynthesis" in window)) return;
 				window.speechSynthesis.cancel();
 				const utterance = new SpeechSynthesisUtterance(word.en);
 				utterance.lang = "en-US";
@@ -697,6 +901,10 @@
 					document.querySelectorAll(".mode-button[data-exercise]").forEach((exerciseButton) => {
 						exerciseButton.setAttribute("aria-pressed", String(exerciseButton === button));
 					});
+					if (state.exercise === "mistakes") {
+						state.category = "all";
+						document.querySelector("#category-select").value = "all";
+					}
 					startGame();
 				});
 			});
@@ -714,13 +922,33 @@
 				startGame();
 			});
 			nextButton.addEventListener("click", advanceQuestion);
+			document.querySelector("#open-mistakes-button").addEventListener("click", showMistakeBook);
+			document.querySelector("#practice-mistakes-button").addEventListener("click", () => {
+				state.exercise = "mistakes";
+				document.querySelectorAll(".mode-button[data-exercise]").forEach((button) => {
+					button.setAttribute("aria-pressed", String(button.dataset.exercise === "mistakes"));
+				});
+				startGame();
+			});
+			document.querySelector("#back-to-game-button").addEventListener("click", () => {
+				state.exercise = "words";
+				document.querySelectorAll(".mode-button[data-exercise]").forEach((button) => {
+					button.setAttribute("aria-pressed", String(button.dataset.exercise === "words"));
+				});
+				startGame();
+			});
 			document.querySelector("#replay-button").addEventListener("click", startGame);
 			document.querySelector("#review-button").addEventListener("click", () => {
+				if (state.exercise === "mistakes") {
+					showMistakeBook();
+					return;
+				}
 				state.category = "all";
 				document.querySelector("#category-select").value = "all";
 				startGame();
 			});
 
+			loadMistakes();
 			startGame();
 		})();
 	</script>
