@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="theme-color" content="#f6f8ff">
+	<title>单词星球 · 英语词汇闯关</title>
+	<style>
+		:root {
+			color-scheme: light;
+			--ink: #25304a;
+			--muted: #78829a;
+			--purple: #7657e8;
+			--purple-dark: #6042d1;
+			--mint: #dff8ef;
+			--yellow: #ffcf5a;
+			--paper: #f6f8ff;
+			--card: #fff;
+			--line: #e8ebf4;
+			--green: #23845f;
+			--red: #d85366;
+		}
+
+		* { box-sizing: border-box; }
+
+		body {
+			min-width: 320px;
+			min-height: 100vh;
+			margin: 0;
+			color: var(--ink);
+			background:
+				radial-gradient(circle at 8% 12%, rgba(255, 207, 90, .22), transparent 18rem),
+				radial-gradient(circle at 94% 24%, rgba(140, 220, 199, .2), transparent 20rem),
+				var(--paper);
+			font-family: "Trebuchet MS", "Microsoft YaHei", sans-serif;
+		}
+
+		button, select { font: inherit; }
+		button:focus-visible, select:focus-visible {
+			outline: 3px solid rgba(118, 87, 232, .35);
+			outline-offset: 3px;
+		}
+
+		.page {
+			width: min(100% - 36px, 1060px);
+			margin: 0 auto;
+			padding: 24px 0 42px;
+		}
+
+		.topbar, .brand, .score-pill, .settings, .mode-switch, .progress-row,
+		.question-top, .feedback, .result-actions {
+			display: flex;
+			align-items: center;
+		}
+
+		.topbar { justify-content: space-between; gap: 16px; }
+		.brand { gap: 10px; font-size: 17px; font-weight: 900; }
+		.brand-mark {
+			display: grid;
+			width: 40px;
+			height: 40px;
+			place-items: center;
+			border-radius: 14px;
+			background: var(--yellow);
+			font-size: 23px;
+			transform: rotate(-7deg);
+		}
+
+		.score-pill {
+			gap: 8px;
+			padding: 10px 15px;
+			border: 1px solid #eee8ff;
+			border-radius: 999px;
+			background: white;
+			font-size: 13px;
+			font-weight: 800;
+			box-shadow: 0 5px 16px rgba(49, 55, 87, .05);
+		}
+
+		.score-pill strong { color: var(--purple); font-size: 16px; }
+
+		main {
+			display: grid;
+			grid-template-columns: minmax(0, 1fr) minmax(350px, 490px);
+			gap: clamp(32px, 7vw, 82px);
+			align-items: center;
+			padding: clamp(42px, 8vh, 78px) 0 50px;
+		}
+
+		.intro { max-width: 450px; }
+		.eyebrow {
+			display: inline-flex;
+			align-items: center;
+			gap: 7px;
+			padding: 8px 12px;
+			border-radius: 999px;
+			background: var(--mint);
+			color: #286f58;
+			font-size: 12px;
+			font-weight: 900;
+		}
+
+		h1 {
+			margin: 20px 0 14px;
+			font-size: clamp(42px, 6vw, 66px);
+			font-weight: 1000;
+			letter-spacing: -2px;
+			line-height: 1.04;
+		}
+
+		h1 span { color: var(--purple); }
+		.intro-copy {
+			max-width: 370px;
+			margin: 0;
+			color: var(--muted);
+			font-size: 15px;
+			line-height: 1.9;
+		}
+
+		.mission {
+			display: flex;
+			align-items: center;
+			gap: 14px;
+			margin-top: 30px;
+			padding: 14px 16px;
+			border: 1px solid #f1e8ca;
+			border-radius: 17px;
+			background: rgba(255, 255, 255, .76);
+		}
+
+		.mission-icon { font-size: 27px; }
+		.mission strong { display: block; font-size: 13px; }
+		.mission small { display: block; margin-top: 4px; color: var(--muted); font-size: 11px; }
+
+		.game-card {
+			position: relative;
+			padding: 25px;
+			border: 1px solid #ececf4;
+			border-radius: 25px;
+			background: var(--card);
+			box-shadow: 0 20px 55px rgba(56, 61, 99, .11);
+		}
+
+		.settings {
+			justify-content: space-between;
+			flex-wrap: wrap;
+			gap: 12px;
+			margin-bottom: 20px;
+		}
+
+		.mode-switch { gap: 5px; padding: 4px; border-radius: 12px; background: #f3f2f9; }
+		.mode-button {
+			padding: 8px 10px;
+			border: 0;
+			border-radius: 9px;
+			background: transparent;
+			color: var(--muted);
+			cursor: pointer;
+			font-size: 11px;
+			font-weight: 800;
+			white-space: nowrap;
+		}
+
+		.mode-button[aria-pressed="true"] {
+			background: white;
+			color: var(--purple);
+			box-shadow: 0 2px 7px rgba(45, 50, 80, .1);
+		}
+
+		.category-select {
+			max-width: 145px;
+			padding: 9px 28px 9px 11px;
+			border: 1px solid var(--line);
+			border-radius: 10px;
+			background: #fff;
+			color: var(--ink);
+			cursor: pointer;
+			font-size: 11px;
+			font-weight: 800;
+		}
+
+		.progress-row {
+			justify-content: space-between;
+			gap: 14px;
+			margin-bottom: 9px;
+			color: var(--muted);
+			font-size: 11px;
+			font-weight: 800;
+		}
+
+		.progress-track {
+			height: 9px;
+			overflow: hidden;
+			border-radius: 99px;
+			background: #f0eff7;
+		}
+
+		.progress-fill {
+			width: 0;
+			height: 100%;
+			border-radius: inherit;
+			background: linear-gradient(90deg, #8e71ff, #6bcaab);
+			transition: width .35s ease;
+		}
+
+		.question-box {
+			margin-top: 20px;
+			padding: 22px 18px 19px;
+			border-radius: 19px;
+			background: #f8f6ff;
+			text-align: center;
+		}
+
+		.question-top { justify-content: center; gap: 7px; color: var(--muted); font-size: 11px; font-weight: 800; }
+		.question-word {
+			min-height: 50px;
+			margin: 12px 0 4px;
+			font-size: clamp(28px, 4vw, 38px);
+			font-weight: 1000;
+			letter-spacing: -.5px;
+		}
+
+		.question-word[data-type="grammar"] {
+			font-size: clamp(18px, 2.4vw, 23px);
+			letter-spacing: 0;
+			line-height: 1.55;
+		}
+
+		.question-hint { margin: 0; color: var(--muted); font-size: 12px; }
+		.speak-button {
+			display: inline-flex;
+			align-items: center;
+			gap: 5px;
+			margin-top: 12px;
+			padding: 7px 11px;
+			border: 1px solid #e8e1ff;
+			border-radius: 999px;
+			background: white;
+			color: var(--purple);
+			cursor: pointer;
+			font-size: 11px;
+			font-weight: 900;
+		}
+
+		.options {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 10px;
+			margin-top: 16px;
+		}
+
+		.option-button {
+			min-height: 54px;
+			padding: 10px 12px;
+			border: 1.5px solid var(--line);
+			border-radius: 14px;
+			background: white;
+			color: var(--ink);
+			cursor: pointer;
+			font-size: 14px;
+			font-weight: 800;
+			transition: transform .15s ease, border-color .15s ease, background .15s ease;
+		}
+
+		.option-button:hover:not(:disabled) {
+			transform: translateY(-2px);
+			border-color: #b7a9ff;
+			background: #fcfbff;
+		}
+
+		.option-button:disabled { cursor: default; }
+		.option-button.correct { border-color: #8bd1b4; background: #e8faf2; color: #20734f; }
+		.option-button.incorrect { border-color: #f0a2ad; background: #fff0f2; color: #bd4053; }
+		.feedback {
+			min-height: 43px;
+			gap: 8px;
+			margin: 11px 0 0;
+			padding: 0 3px;
+			color: var(--muted);
+			font-size: 12px;
+			font-weight: 800;
+		}
+
+		.feedback[data-state="correct"] { color: var(--green); }
+		.feedback[data-state="incorrect"] { color: var(--red); }
+
+		.card-foot {
+			display: flex;
+			justify-content: space-between;
+			gap: 10px;
+			margin-top: 8px;
+			padding-top: 14px;
+			border-top: 1px solid #f0f0f5;
+			color: var(--muted);
+			font-size: 10px;
+		}
+
+		#result-screen { padding: 24px 6px 6px; text-align: center; }
+		.result-emoji { font-size: 58px; animation: bounce .7s ease both; }
+		#result-title { margin: 7px 0; font-size: 28px; }
+		.result-copy { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.8; }
+		.result-score { margin: 20px 0; color: var(--purple); font-size: 38px; font-weight: 1000; }
+		.result-score small { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; }
+		.result-actions { justify-content: center; flex-wrap: wrap; gap: 9px; }
+		.primary-button, .secondary-button {
+			min-height: 44px;
+			padding: 0 18px;
+			border: 0;
+			border-radius: 12px;
+			cursor: pointer;
+			font-size: 12px;
+			font-weight: 900;
+		}
+
+		.primary-button { background: var(--purple); color: white; }
+		.primary-button:hover { background: var(--purple-dark); }
+		.secondary-button { border: 1px solid var(--line); background: white; color: var(--ink); }
+		footer { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 10px; }
+		[hidden] { display: none !important; }
+
+		@keyframes bounce {
+			0% { opacity: 0; transform: scale(.7) translateY(8px); }
+			70% { transform: scale(1.12) translateY(-3px); }
+			100% { opacity: 1; transform: scale(1); }
+		}
+
+		@media (max-width: 760px) {
+			.page { width: min(100% - 28px, 520px); padding-top: 17px; }
+			main { grid-template-columns: 1fr; gap: 25px; padding: 38px 0 32px; }
+			.intro { max-width: none; }
+			h1 { margin: 14px 0 10px; font-size: 46px; }
+			.intro-copy { max-width: 420px; font-size: 13px; }
+			.mission { margin-top: 17px; padding: 11px 14px; }
+			.game-card { padding: 19px; }
+		}
+
+		@media (max-width: 390px) {
+			.brand { font-size: 14px; }
+			.score-pill { padding: 8px 11px; font-size: 11px; }
+			.mode-button { padding: 8px 7px; font-size: 10px; }
+			.settings { gap: 8px; }
+			.category-select { max-width: 120px; }
+			.option-button { font-size: 12px; }
+		}
+
+		@media (prefers-reduced-motion: reduce) {
+			*, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+		}
+	</style>
+</head>
+<body>
+	<div class="page">
+		<header class="topbar">
+			<div class="brand"><span class="brand-mark" aria-hidden="true">🚀</span> 单词星球</div>
+			<div class="score-pill" aria-label="本局得分">⭐ <span>得分</span><strong id="score">0</strong></div>
+		</header>
+
+		<main>
+			<section class="intro" aria-labelledby="page-title">
+				<div class="eyebrow">✨ 译林版五上 · Unit 1–4 暂定</div>
+				<h1 id="page-title">词汇<br><span>探险队！</span></h1>
+				<p class="intro-copy">按五年级上册常见 Unit 1–4 目录整理词汇，并加入本阶段基础语法选择题。答题收集星星，在闯关中复习课内知识。</p>
+				<div class="mission">
+					<span class="mission-icon" aria-hidden="true">🪐</span>
+					<div><strong>今日任务：点亮 10 颗星</strong><small>答对得分，连续答对还有连击奖励！</small></div>
+				</div>
+			</section>
+
+			<section class="game-card" aria-label="英语单词闯关">
+				<div id="quiz-screen">
+					<div class="settings">
+						<div class="mode-switch" role="group" aria-label="选择练习内容">
+							<button class="mode-button" type="button" data-exercise="words" aria-pressed="true">📖 词汇</button>
+							<button class="mode-button" type="button" data-exercise="grammar" aria-pressed="false">✏️ 语法</button>
+						</div>
+						<div class="mode-switch" id="language-switch" role="group" aria-label="选择练习方向">
+							<button class="mode-button" type="button" data-mode="en-zh" aria-pressed="true">🇬🇧 英译中</button>
+							<button class="mode-button" type="button" data-mode="zh-en" aria-pressed="false">🇨🇳 中译英</button>
+						</div>
+						<label>
+							<span class="sr-only" hidden>选择单词分类</span>
+							<select id="category-select" class="category-select" aria-label="选择单词分类">
+								<option value="all">🌈 Unit 1–4 综合</option>
+								<option value="unit1">📚 Unit 1 科目</option>
+								<option value="unit2">🏫 Unit 2 校园</option>
+								<option value="unit3">🐾 Unit 3 动物</option>
+								<option value="unit4">🎨 Unit 4 爱好</option>
+							</select>
+						</label>
+					</div>
+
+					<div class="progress-row">
+						<span id="round-label">第 1 题 · 共 10 题</span>
+						<span id="streak-label">🔥 连对 0 题</span>
+					</div>
+					<div class="progress-track" role="progressbar" aria-label="闯关进度" aria-valuemin="0" aria-valuemax="10" aria-valuenow="0">
+						<div class="progress-fill" id="progress-fill"></div>
+					</div>
+
+					<div class="question-box">
+						<div class="question-top"><span id="category-emoji">📚</span><span id="question-label">这个单词是什么意思？</span></div>
+						<h2 class="question-word" id="question-word">apple</h2>
+						<p class="question-hint" id="question-hint">选择正确的中文意思</p>
+						<button class="speak-button" id="speak-button" type="button" aria-label="播放单词发音">🔊 听发音</button>
+					</div>
+
+					<div class="options" id="options" role="group" aria-label="选择答案"></div>
+					<p class="feedback" id="feedback" data-state="idle" role="status" aria-live="polite">选一个你觉得正确的答案吧！</p>
+					<div class="card-foot"><span>💡 答错也没关系，弄懂知识点就是胜利！</span><span>每轮 10 题</span></div>
+				</div>
+
+				<div id="result-screen" hidden>
+					<div class="result-emoji" id="result-emoji" aria-hidden="true">🏆</div>
+					<h2 id="result-title">闯关成功！</h2>
+					<p class="result-copy" id="result-copy">你完成了今天的单词探险！</p>
+					<div class="result-score"><span id="final-score">0</span><small>本轮获得星星</small></div>
+					<div class="result-actions">
+						<button class="primary-button" id="replay-button" type="button">🔄 再玩一轮</button>
+						<button class="secondary-button" id="review-button" type="button">📚 换个主题</button>
+					</div>
+				</div>
+			</section>
+		</main>
+		<footer><span>译林版五年级上册 · Unit 1–4 暂定词汇与语法</span><span>加油，你已经很棒啦！ 🌟</span></footer>
+	</div>
+
+	<script>
+		(() => {
+			const WORDS = [
+				{ en: "subject", zh: "科目", unit: "unit1", icon: "📚" },
+				{ en: "Chinese", zh: "语文；中文", unit: "unit1", icon: "📚" },
+				{ en: "Maths", zh: "数学", unit: "unit1", icon: "📚" },
+				{ en: "English", zh: "英语", unit: "unit1", icon: "📚" },
+				{ en: "Art", zh: "美术", unit: "unit1", icon: "📚" },
+				{ en: "PE", zh: "体育", unit: "unit1", icon: "📚" },
+				{ en: "Music", zh: "音乐", unit: "unit1", icon: "📚" },
+				{ en: "Science", zh: "科学", unit: "unit1", icon: "📚" },
+				{ en: "lesson", zh: "课", unit: "unit1", icon: "📚" },
+				{ en: "Monday", zh: "星期一", unit: "unit1", icon: "📚" },
+				{ en: "Tuesday", zh: "星期二", unit: "unit1", icon: "📚" },
+				{ en: "Wednesday", zh: "星期三", unit: "unit1", icon: "📚" },
+				{ en: "Thursday", zh: "星期四", unit: "unit1", icon: "📚" },
+				{ en: "Friday", zh: "星期五", unit: "unit1", icon: "📚" },
+				{ en: "week", zh: "星期；周", unit: "unit1", icon: "📚" },
+				{ en: "afternoon", zh: "下午", unit: "unit1", icon: "📚" },
+				{ en: "fun", zh: "有趣的；乐趣", unit: "unit1", icon: "📚" },
+				{ en: "timetable", zh: "课程表", unit: "unit1", icon: "📚" },
+				{ en: "student", zh: "学生", unit: "unit2", icon: "🏫" },
+				{ en: "new", zh: "新的", unit: "unit2", icon: "🏫" },
+				{ en: "show", zh: "带领参观；展示", unit: "unit2", icon: "🏫" },
+				{ en: "around", zh: "周围；到处", unit: "unit2", icon: "🏫" },
+				{ en: "library", zh: "图书馆", unit: "unit2", icon: "🏫" },
+				{ en: "classroom", zh: "教室", unit: "unit2", icon: "🏫" },
+				{ en: "computer room", zh: "电脑室", unit: "unit2", icon: "🏫" },
+				{ en: "music room", zh: "音乐室", unit: "unit2", icon: "🏫" },
+				{ en: "playground", zh: "操场", unit: "unit2", icon: "🏫" },
+				{ en: "first", zh: "第一", unit: "unit2", icon: "🏫" },
+				{ en: "second", zh: "第二", unit: "unit2", icon: "🏫" },
+				{ en: "third", zh: "第三", unit: "unit2", icon: "🏫" },
+				{ en: "floor", zh: "楼层；地板", unit: "unit2", icon: "🏫" },
+				{ en: "swing", zh: "秋千", unit: "unit2", icon: "🏫" },
+				{ en: "push", zh: "推", unit: "unit2", icon: "🏫" },
+				{ en: "heavy", zh: "重的", unit: "unit2", icon: "🏫" },
+				{ en: "stop", zh: "停止", unit: "unit2", icon: "🏫" },
+				{ en: "high", zh: "高的", unit: "unit2", icon: "🏫" },
+				{ en: "animal", zh: "动物", unit: "unit3", icon: "🐾" },
+				{ en: "friend", zh: "朋友", unit: "unit3", icon: "🐾" },
+				{ en: "body", zh: "身体", unit: "unit3", icon: "🐾" },
+				{ en: "tail", zh: "尾巴", unit: "unit3", icon: "🐾" },
+				{ en: "wing", zh: "翅膀", unit: "unit3", icon: "🐾" },
+				{ en: "leg", zh: "腿", unit: "unit3", icon: "🐾" },
+				{ en: "arm", zh: "手臂", unit: "unit3", icon: "🐾" },
+				{ en: "foot", zh: "脚", unit: "unit3", icon: "🐾" },
+				{ en: "finger", zh: "手指", unit: "unit3", icon: "🐾" },
+				{ en: "rabbit", zh: "兔子", unit: "unit3", icon: "🐾" },
+				{ en: "parrot", zh: "鹦鹉", unit: "unit3", icon: "🐾" },
+				{ en: "dog", zh: "狗", unit: "unit3", icon: "🐾" },
+				{ en: "goldfish", zh: "金鱼", unit: "unit3", icon: "🐾" },
+				{ en: "give", zh: "给", unit: "unit3", icon: "🐾" },
+				{ en: "hobby", zh: "爱好", unit: "unit4", icon: "🎨" },
+				{ en: "sing", zh: "唱歌", unit: "unit4", icon: "🎨" },
+				{ en: "dance", zh: "跳舞", unit: "unit4", icon: "🎨" },
+				{ en: "draw", zh: "画画", unit: "unit4", icon: "🎨" },
+				{ en: "read", zh: "阅读", unit: "unit4", icon: "🎨" },
+				{ en: "swim", zh: "游泳", unit: "unit4", icon: "🎨" },
+				{ en: "skate", zh: "滑冰；滑板", unit: "unit4", icon: "🎨" },
+				{ en: "play football", zh: "踢足球", unit: "unit4", icon: "🎨" },
+				{ en: "play basketball", zh: "打篮球", unit: "unit4", icon: "🎨" },
+				{ en: "play the piano", zh: "弹钢琴", unit: "unit4", icon: "🎨" },
+				{ en: "watch films", zh: "看电影", unit: "unit4", icon: "🎨" },
+				{ en: "both", zh: "两者都", unit: "unit4", icon: "🎨" },
+				{ en: "also", zh: "也；还", unit: "unit4", icon: "🎨" },
+				{ en: "idea", zh: "主意；想法", unit: "unit4", icon: "🎨" },
+				{ en: "about", zh: "关于；大约", unit: "unit4", icon: "🎨" }
+			];
+			const GRAMMAR_QUESTIONS = [
+				{ unit: "unit1", prompt: "What subjects ___ you like?", answer: "do", options: ["do", "does", "is", "are"], explanation: "问对方喜欢什么科目，用 do you like。" },
+				{ unit: "unit1", prompt: "What subjects do you like? — I like ___.", answer: "Science", options: ["Science", "Monday", "classroom", "student"], explanation: "回答喜欢的科目：I like + 科目。" },
+				{ unit: "unit1", prompt: "What ___ do you have this morning?", answer: "lessons", options: ["lessons", "subject", "like", "week"], explanation: "询问今天上午有什么课：What lessons do you have...?" },
+				{ unit: "unit1", prompt: "We ___ English and Maths on Monday.", answer: "have", options: ["have", "has", "is", "likes"], explanation: "主语 we 后用 have，表示“有/上课”。" },
+				{ unit: "unit1", prompt: "Does Mike like Music? — Yes, he ___.", answer: "does", options: ["does", "do", "is", "likes"], explanation: "Does 开头的一般疑问句，肯定回答用 Yes, he does。" },
+				{ unit: "unit1", prompt: "Do you like PE? — No, I ___.", answer: "don't", options: ["don't", "doesn't", "am not", "isn't"], explanation: "Do you...? 的否定回答是 No, I don't。" },
+				{ unit: "unit1", prompt: "What ___ does Yang Ling like?", answer: "subject", options: ["subject", "lessons", "does", "do"], explanation: "询问喜欢哪门科目：What subject does...like?" },
+				{ unit: "unit1", prompt: "It's time ___ Music.", answer: "for", options: ["for", "to", "at", "on"], explanation: "It's time for + 名词，表示“到……的时间了”。" },
+				{ unit: "unit1", prompt: "We have a new subject. ___ is Science.", answer: "It", options: ["It", "They", "We", "There"], explanation: "用 It 指代前面提到的单数事物。" },
+				{ unit: "unit1", prompt: "How many ___ do you have?", answer: "subjects", options: ["subjects", "subject", "Science", "Monday"], explanation: "How many 后接可数名词复数。" },
+				{ unit: "unit2", prompt: "___ there a library in your school?", answer: "Is", options: ["Is", "Are", "Do", "Does"], explanation: "There be 句型的单数一般疑问句用 Is there...?" },
+				{ unit: "unit2", prompt: "There ___ a computer room on the second floor.", answer: "is", options: ["is", "are", "have", "has"], explanation: "a computer room 是单数，There be 用 is。" },
+				{ unit: "unit2", prompt: "There ___ two music rooms in our school.", answer: "are", options: ["are", "is", "has", "does"], explanation: "two music rooms 是复数，There be 用 are。" },
+				{ unit: "unit2", prompt: "Are there ___ swings in the playground?", answer: "any", options: ["any", "some", "a", "an"], explanation: "一般疑问句中通常用 any，询问是否有秋千。" },
+				{ unit: "unit2", prompt: "There are ___ classrooms on this floor.", answer: "some", options: ["some", "any", "a", "an"], explanation: "肯定句表示“有一些”时可用 some。" },
+				{ unit: "unit2", prompt: "How many classrooms ___ there?", answer: "are", options: ["are", "is", "do", "does"], explanation: "classrooms 是复数，问句用 How many ... are there?" },
+				{ unit: "unit2", prompt: "___ there any computer rooms? — Yes, there are.", answer: "Are", options: ["Are", "Is", "Do", "Does"], explanation: "computer rooms 是复数，用 Are there...?" },
+				{ unit: "unit2", prompt: "Is there a music room? — No, there ___.", answer: "isn't", options: ["isn't", "aren't", "don't", "doesn't"], explanation: "Is there...? 的否定回答是 No, there isn't。" },
+				{ unit: "unit2", prompt: "The library is ___ the first floor.", answer: "on", options: ["on", "in", "at", "under"], explanation: "表示在第几层，常用 on the ... floor。" },
+				{ unit: "unit2", prompt: "There ___ a swing and two slides in the playground.", answer: "is", options: ["is", "are", "have", "do"], explanation: "There be 后紧跟的 a swing 是单数，be 动词用 is。" },
+				{ unit: "unit3", prompt: "___ you have an animal friend?", answer: "Do", options: ["Do", "Does", "Are", "Is"], explanation: "主语 you 的一般现在时一般疑问句用 Do 开头。" },
+				{ unit: "unit3", prompt: "Does it have a tail? — Yes, it ___.", answer: "does", options: ["does", "do", "has", "is"], explanation: "Does it...? 的肯定回答是 Yes, it does。" },
+				{ unit: "unit3", prompt: "My dog ___ four legs.", answer: "has", options: ["has", "have", "is", "does"], explanation: "第三人称单数主语 my dog 后用 has。" },
+				{ unit: "unit3", prompt: "The rabbits ___ long ears.", answer: "have", options: ["have", "has", "is", "does"], explanation: "复数主语 the rabbits 后用 have。" },
+				{ unit: "unit3", prompt: "Does your parrot have wings? — No, it ___.", answer: "doesn't", options: ["doesn't", "don't", "isn't", "hasn't"], explanation: "Does your parrot...? 的否定回答是 No, it doesn't。" },
+				{ unit: "unit3", prompt: "What ___ your goldfish have?", answer: "does", options: ["does", "do", "is", "are"], explanation: "主语 your goldfish 是第三人称单数，特殊疑问句用 does。" },
+				{ unit: "unit3", prompt: "It ___ a big body and a long tail.", answer: "has", options: ["has", "have", "is", "does"], explanation: "主语 it 是第三人称单数，陈述句用 has。" },
+				{ unit: "unit3", prompt: "They ___ four legs and a short tail.", answer: "have", options: ["have", "has", "is", "does"], explanation: "主语 they 是复数，陈述句用 have。" },
+				{ unit: "unit3", prompt: "___ it run? — Yes, it can.", answer: "Can", options: ["Can", "Does", "Is", "Has"], explanation: "询问能力用 Can 开头，回答也用 can。" },
+				{ unit: "unit3", prompt: "A parrot can ___ and talk.", answer: "fly", options: ["fly", "flies", "flying", "to flies"], explanation: "情态动词 can 后接动词原形。" },
+				{ unit: "unit4", prompt: "What do you like ___?", answer: "doing", options: ["doing", "do", "does", "did"], explanation: "询问爱好用 What do you like doing?" },
+				{ unit: "unit4", prompt: "I like ___.", answer: "reading", options: ["reading", "read", "reads", "to reading"], explanation: "like 表示喜欢做某事时，可用 like + 动词-ing。" },
+				{ unit: "unit4", prompt: "He likes ___ football after school.", answer: "playing", options: ["playing", "play", "plays", "played"], explanation: "likes 后接动词-ing：likes playing。" },
+				{ unit: "unit4", prompt: "She is good at ___.", answer: "dancing", options: ["dancing", "dance", "dances", "to dance"], explanation: "be good at 后接名词或动词-ing。" },
+				{ unit: "unit4", prompt: "Does Mike like ___ films?", answer: "watching", options: ["watching", "watch", "watches", "watched"], explanation: "Does...like 后的动词用原形；like 后可接 watching。" },
+				{ unit: "unit4", prompt: "Does your sister like singing? — Yes, she ___.", answer: "does", options: ["does", "do", "is", "likes"], explanation: "Does your sister...? 的肯定回答是 Yes, she does。" },
+				{ unit: "unit4", prompt: "Do they like skating? — No, they ___.", answer: "don't", options: ["don't", "doesn't", "aren't", "isn't"], explanation: "Do they...? 的否定回答是 No, they don't。" },
+				{ unit: "unit4", prompt: "What ___ your brother like doing?", answer: "does", options: ["does", "do", "is", "are"], explanation: "your brother 是第三人称单数，问句用 does。" },
+				{ unit: "unit4", prompt: "My hobbies ___ reading and drawing.", answer: "are", options: ["are", "is", "am", "be"], explanation: "hobbies 是复数，be 动词用 are。" },
+				{ unit: "unit4", prompt: "We both like ___.", answer: "singing", options: ["singing", "sing", "sings", "sang"], explanation: "like 后接动词-ing 表示喜欢做某事。" }
+			];
+			const QUESTION_COUNT = 10;
+			const state = { exercise: "words", mode: "en-zh", category: "all", questions: [], index: 0, score: 0, correct: 0, streak: 0, answered: false, advanceTimer: null };
+			const quizScreen = document.querySelector("#quiz-screen");
+			const resultScreen = document.querySelector("#result-screen");
+			const optionsElement = document.querySelector("#options");
+			const feedback = document.querySelector("#feedback");
+			const speakButton = document.querySelector("#speak-button");
+			const progress = document.querySelector(".progress-track");
+			const languageSwitch = document.querySelector("#language-switch");
+
+			function shuffle(items) {
+				const result = [...items];
+				for (let i = result.length - 1; i > 0; i -= 1) {
+					const j = Math.floor(Math.random() * (i + 1));
+					[result[i], result[j]] = [result[j], result[i]];
+				}
+				return result;
+			}
+
+			function currentPool() {
+				const source = state.exercise === "words" ? WORDS : GRAMMAR_QUESTIONS;
+				return state.category === "all" ? source : source.filter((question) => question.unit === state.category);
+			}
+
+			function startGame() {
+				window.clearTimeout(state.advanceTimer);
+				state.advanceTimer = null;
+				const pool = currentPool();
+				if (pool.length < QUESTION_COUNT) {
+					feedback.textContent = "这个单元的题目还不够多，请选择 Unit 1–4 综合。";
+					return;
+				}
+				state.questions = shuffle(pool).slice(0, QUESTION_COUNT);
+				state.index = 0;
+				state.score = 0;
+				state.correct = 0;
+				state.streak = 0;
+				state.answered = false;
+				document.querySelector("#score").textContent = "0";
+				quizScreen.hidden = false;
+				resultScreen.hidden = true;
+				languageSwitch.hidden = state.exercise !== "words";
+				document.querySelector("#question-hint").textContent = state.exercise === "grammar"
+					? "选择正确的单词或句子"
+					: state.mode === "en-zh" ? "选择正确的中文意思" : "选择正确的英文单词";
+				renderQuestion();
+			}
+
+			function renderQuestion() {
+				const question = state.questions[state.index];
+				const isVocabulary = state.exercise === "words";
+				const isEnglishPrompt = state.mode === "en-zh";
+				document.querySelector("#round-label").textContent = `第 ${state.index + 1} 题 · 共 ${QUESTION_COUNT} 题`;
+				document.querySelector("#streak-label").textContent = `🔥 连对 ${state.streak} 题`;
+				document.querySelector("#question-label").textContent = isVocabulary
+					? isEnglishPrompt ? "这个单词是什么意思？" : "这个中文怎么说？"
+					: `语法小挑战 · Unit ${question.unit.slice(-1)}`;
+				const questionWord = document.querySelector("#question-word");
+				questionWord.textContent = isVocabulary
+					? isEnglishPrompt ? question.en : question.zh
+					: question.prompt;
+				questionWord.dataset.type = isVocabulary ? "vocabulary" : "grammar";
+				document.querySelector("#category-emoji").textContent = isVocabulary ? question.icon : "✏️";
+				speakButton.hidden = !isVocabulary || !("speechSynthesis" in window);
+				feedback.textContent = "选一个你觉得正确的答案吧！";
+				feedback.dataset.state = "idle";
+				state.answered = false;
+				progress.setAttribute("aria-valuenow", String(state.index));
+				document.querySelector("#progress-fill").style.width = `${(state.index / QUESTION_COUNT) * 100}%`;
+
+				const answer = isVocabulary ? isEnglishPrompt ? question.zh : question.en : question.answer;
+				const choices = isVocabulary
+					? shuffle([
+						{ text: answer, correct: true },
+						...shuffle(currentPool().filter((candidate) => candidate !== question)).slice(0, 3)
+							.map((candidate) => ({ text: isEnglishPrompt ? candidate.zh : candidate.en, correct: false }))
+					])
+					: shuffle(question.options.map((text) => ({ text, correct: text === answer })));
+				optionsElement.replaceChildren();
+				choices.forEach((choice) => {
+					const button = document.createElement("button");
+					button.type = "button";
+					button.className = "option-button";
+					button.textContent = choice.text;
+					button.addEventListener("click", () => chooseAnswer(button, choice.correct, question));
+					optionsElement.append(button);
+				});
+			}
+
+			function chooseAnswer(selectedButton, isCorrect, question) {
+				if (state.answered) return;
+				state.answered = true;
+				const buttons = [...optionsElement.querySelectorAll("button")];
+				buttons.forEach((button) => { button.disabled = true; });
+				const answer = state.exercise === "words"
+					? state.mode === "en-zh" ? question.zh : question.en
+					: question.answer;
+				const correctButton = buttons.find((button) => button.textContent === answer);
+				if (correctButton) correctButton.classList.add("correct");
+
+				if (isCorrect) {
+					state.correct += 1;
+					state.streak += 1;
+					const points = 10 + Math.min(state.streak - 1, 5) * 2;
+					state.score += points;
+					document.querySelector("#score").textContent = String(state.score);
+					document.querySelector("#streak-label").textContent = `🔥 连对 ${state.streak} 题`;
+					feedback.textContent = `太棒了！答对啦，获得 ${points} 分${state.streak > 1 ? "，连击奖励继续加油！" : "！"}${state.exercise === "grammar" ? ` ${question.explanation}` : ""}`;
+					feedback.dataset.state = "correct";
+				} else {
+					selectedButton.classList.add("incorrect");
+					state.streak = 0;
+					document.querySelector("#streak-label").textContent = "🔥 连对 0 题";
+					feedback.textContent = state.exercise === "words"
+						? `差一点点！正确答案是：${answer}`
+						: `差一点点！正确答案：${answer}。${question.explanation}`;
+					feedback.dataset.state = "incorrect";
+				}
+
+				state.advanceTimer = window.setTimeout(() => {
+					state.advanceTimer = null;
+					state.index += 1;
+					if (state.index === QUESTION_COUNT) showResults();
+					else renderQuestion();
+				}, 1100);
+			}
+
+			function showResults() {
+				quizScreen.hidden = true;
+				resultScreen.hidden = false;
+				progress.setAttribute("aria-valuenow", String(QUESTION_COUNT));
+				document.querySelector("#progress-fill").style.width = "100%";
+				document.querySelector("#final-score").textContent = String(state.score);
+				const correctCount = state.correct;
+				const title = correctCount >= 9 ? "太厉害啦，学习冠军！" : correctCount >= 6 ? "挑战成功，继续加油！" : "完成挑战，你真棒！";
+				document.querySelector("#result-title").textContent = title;
+				document.querySelector("#result-copy").textContent = `10 题里你答对了 ${correctCount} 题。每一次练习，都会让知识记得更牢！`;
+				document.querySelector("#result-emoji").textContent = correctCount >= 9 ? "🏆" : correctCount >= 6 ? "🚀" : "🌟";
+			}
+
+			speakButton.addEventListener("click", () => {
+				const word = state.questions[state.index];
+				if (state.exercise !== "words" || !word || !("speechSynthesis" in window)) return;
+				window.speechSynthesis.cancel();
+				const utterance = new SpeechSynthesisUtterance(word.en);
+				utterance.lang = "en-US";
+				utterance.rate = 0.85;
+				window.speechSynthesis.speak(utterance);
+			});
+
+			document.querySelectorAll(".mode-button[data-exercise]").forEach((button) => {
+				button.addEventListener("click", () => {
+					state.exercise = button.dataset.exercise;
+					document.querySelectorAll(".mode-button[data-exercise]").forEach((exerciseButton) => {
+						exerciseButton.setAttribute("aria-pressed", String(exerciseButton === button));
+					});
+					startGame();
+				});
+			});
+			document.querySelectorAll(".mode-button[data-mode]").forEach((button) => {
+				button.addEventListener("click", () => {
+					state.mode = button.dataset.mode;
+					document.querySelectorAll(".mode-button[data-mode]").forEach((modeButton) => {
+						modeButton.setAttribute("aria-pressed", String(modeButton === button));
+					});
+					startGame();
+				});
+			});
+			document.querySelector("#category-select").addEventListener("change", (event) => {
+				state.category = event.target.value;
+				startGame();
+			});
+			document.querySelector("#replay-button").addEventListener("click", startGame);
+			document.querySelector("#review-button").addEventListener("click", () => {
+				state.category = "all";
+				document.querySelector("#category-select").value = "all";
+				startGame();
+			});
+
+			startGame();
+		})();
+	</script>
+</body>
+</html>
