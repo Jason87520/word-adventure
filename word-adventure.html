@@ -11,7 +11,7 @@
 			--ink: #25304a;
 			--muted: #78829a;
 			--purple: #7657e8;
-			--purple-dark: #6042d1;
+			--purple-dark: #0d0c12;
 			--mint: #dff8ef;
 			--yellow: #ffcf5a;
 			--paper: #f6f8ff;
@@ -183,7 +183,7 @@
 		.mistake-book-button:hover { border-color: #e8c86f; background: #fff5dc; }
 
 		.category-select {
-			max-width: 145px;
+			max-width: 165px;
 			padding: 9px 28px 9px 11px;
 			border: 1px solid var(--line);
 			border-radius: 10px;
@@ -346,6 +346,36 @@
 		footer { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 10px; }
 		[hidden] { display: none !important; }
 
+		.dictation-button[aria-pressed="true"] { border-color: #b7a9ff; background: #f1ecff; color: var(--purple-dark); }
+		.dictation-form { margin-top: 16px; }
+		.dictation-label { display: block; margin-bottom: 8px; color: var(--muted); font-size: 11px; font-weight: 800; text-align: left; }
+		.dictation-row { display: flex; gap: 9px; }
+		.dictation-input {
+			flex: 1;
+			min-width: 0;
+			min-height: 46px;
+			padding: 0 14px;
+			border: 1.5px solid var(--line);
+			border-radius: 12px;
+			color: var(--ink);
+			font: inherit;
+			font-size: 16px;
+			font-weight: 800;
+		}
+		.dictation-input:focus-visible { outline: 3px solid rgba(118, 87, 232, .35); outline-offset: 2px; border-color: #b7a9ff; }
+		.dictation-input:disabled { background: #f7f6fb; color: var(--muted); }
+		.dictation-row .primary-button { min-width: 84px; }
+		.reason-picker { margin: 0 0 6px; padding: 10px 12px; border: 1px dashed #f0cfa0; border-radius: 13px; background: #fffaf1; }
+		.reason-title { display: block; margin-bottom: 8px; color: #88621d; font-size: 11px; font-weight: 900; text-align: left; }
+		.reason-options { display: flex; flex-wrap: wrap; gap: 7px; }
+		.reason-button { min-height: 32px; padding: 0 12px; border: 1px solid #f0dfb8; border-radius: 9px; background: #fff; color: #88621d; cursor: pointer; font-size: 11px; font-weight: 900; }
+		.reason-button:hover { border-color: #e8c86f; background: #fff5dc; }
+		.reason-button[aria-pressed="true"] { border-color: #e0a83c; background: #ffe9b8; color: #6d4c10; }
+		.weak-units { margin: 0 0 20px; padding: 12px 14px; border-radius: 14px; background: #fff7ea; color: #7a5a1a; font-size: 12px; line-height: 1.8; text-align: left; }
+		.weak-units strong { display: block; margin-bottom: 5px; font-size: 12px; }
+		.weak-units ul { margin: 0; padding-left: 18px; }
+		.reason-tag { display: inline-block; margin-left: 2px; padding: 1px 7px; border-radius: 999px; background: #fff0d6; color: #8a651c; font-size: 10px; font-weight: 900; }
+
 		@keyframes bounce {
 			0% { opacity: 0; transform: scale(.7) translateY(8px); }
 			70% { transform: scale(1.12) translateY(-3px); }
@@ -367,7 +397,7 @@
 			.score-pill { padding: 8px 11px; font-size: 11px; }
 			.mode-button { padding: 8px 7px; font-size: 10px; }
 			.settings { gap: 8px; }
-			.category-select { max-width: 120px; }
+			.category-select { max-width: 145px; }
 			.option-button { font-size: 12px; }
 		}
 
@@ -385,9 +415,9 @@
 
 		<main>
 			<section class="intro" aria-labelledby="page-title">
-				<div class="eyebrow">✨ 译林版五上 · Unit 1–4 暂定</div>
+				<div class="eyebrow">✨ 译林版五上 · 2026新版 全8单元</div>
 				<h1 id="page-title">词汇<br><span>探险队！</span></h1>
-				<p class="intro-copy">按五年级上册常见 Unit 1–4 目录整理词汇，并加入本阶段基础语法选择题。答题收集星星，在闯关中复习课内知识。</p>
+				<p class="intro-copy">按 2026 新版译林版五年级上册 8 个单元整理核心词汇（四会 + 三会），每单元配套语法选择题，还可切换听写模式练拼写。</p>
 				<div class="mission">
 					<span class="mission-icon" aria-hidden="true">🪐</span>
 					<div><strong>今日任务：点亮 10 颗星</strong><small>答对得分，连续答对还有连击奖励！</small></div>
@@ -403,6 +433,7 @@
 							<button class="mode-button" type="button" data-exercise="mistakes" aria-pressed="false">📕 错题练习</button>
 						</div>
 						<button class="mistake-book-button" id="open-mistakes-button" type="button">📒 错题本 <span id="mistake-count">0</span></button>
+						<button class="mistake-book-button dictation-button" id="dictation-button" type="button" aria-pressed="false">⌨️ 听写模式</button>
 						<div class="mode-switch" id="language-switch" role="group" aria-label="选择练习方向">
 							<button class="mode-button" type="button" data-mode="en-zh" aria-pressed="true">🇬🇧 英译中</button>
 							<button class="mode-button" type="button" data-mode="zh-en" aria-pressed="false">🇨🇳 中译英</button>
@@ -410,11 +441,17 @@
 						<label>
 							<span class="sr-only" hidden>选择单词分类</span>
 							<select id="category-select" class="category-select" aria-label="选择单词分类">
-								<option value="all">🌈 Unit 1–4 综合</option>
-								<option value="unit1">📚 Unit 1 科目</option>
-								<option value="unit2">🏫 Unit 2 校园</option>
-								<option value="unit3">🐾 Unit 3 动物</option>
-								<option value="unit4">🎨 Unit 4 爱好</option>
+								<option value="all">🌈 全册综合 U1–8</option>
+								<option value="midterm">📗 期中综合 U1–4</option>
+								<option value="final">📘 期末综合 U1–8</option>
+								<option value="unit1">🧼 U1 Good habits</option>
+								<option value="unit2">😊 U2 I feel good</option>
+								<option value="unit3">🎨 U3 Hobbies</option>
+								<option value="unit4">🚦 U4 Safety first</option>
+								<option value="unit5">🌤️ U5 At weekends</option>
+								<option value="unit6">🤝 U6 Getting along</option>
+								<option value="unit7">🛒 U7 Shopping smart</option>
+								<option value="unit8">🎉 U8 Festivals</option>
 							</select>
 						</label>
 					</div>
@@ -435,7 +472,22 @@
 					</div>
 
 					<div class="options" id="options" role="group" aria-label="选择答案"></div>
+					<form class="dictation-form" id="dictation-form" novalidate hidden>
+						<label class="dictation-label" for="dictation-input">✍️ 根据中文写出英文，按回车提交（拼写要完全正确）</label>
+						<div class="dictation-row">
+							<input class="dictation-input" id="dictation-input" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="输入英文答案">
+							<button class="primary-button" id="dictation-submit" type="submit">提交</button>
+						</div>
+					</form>
 					<p class="feedback" id="feedback" data-state="idle" role="status" aria-live="polite">选一个你觉得正确的答案吧！</p>
+					<div class="reason-picker" id="reason-picker" hidden>
+						<span class="reason-title">这道题错在哪里？（选一个，记进错题本）</span>
+						<div class="reason-options" role="group" aria-label="选择错误原因">
+							<button class="reason-button" type="button" data-reason="不认识" aria-pressed="false">🤔 不认识</button>
+							<button class="reason-button" type="button" data-reason="拼错" aria-pressed="false">✏️ 拼错</button>
+							<button class="reason-button" type="button" data-reason="语法错" aria-pressed="false">📐 语法错</button>
+						</div>
+					</div>
 					<button class="primary-button next-button" id="next-button" type="button" hidden>下一题 →</button>
 					<div class="card-foot"><span>💡 答错也没关系，弄懂知识点就是胜利！</span><span id="round-size-label">每轮 10 题</span></div>
 				</div>
@@ -456,6 +508,7 @@
 					<h2 id="result-title">闯关成功！</h2>
 					<p class="result-copy" id="result-copy">你完成了今天的单词探险！</p>
 					<div class="result-score"><span id="final-score">0</span><small>本轮获得星星</small></div>
+					<div class="weak-units" id="weak-units" hidden></div>
 					<div class="result-actions">
 						<button class="primary-button" id="replay-button" type="button">🔄 再玩一轮</button>
 						<button class="secondary-button" id="review-button" type="button">📚 换个主题</button>
@@ -464,123 +517,255 @@
 				<p class="storage-notice" id="storage-notice" role="alert" hidden></p>
 			</section>
 		</main>
-		<footer><span>译林版五年级上册 · Unit 1–4 暂定词汇与语法</span><span>加油，你已经很棒啦！ 🌟</span></footer>
+		<footer><span>译林版五年级上册 · 2026新版 Unit 1–8 核心词汇与语法</span><span>加油，你已经很棒啦！ 🌟</span></footer>
 	</div>
 
 	<script>
 		(() => {
 			const WORDS = [
-				{ en: "subject", zh: "科目", unit: "unit1", icon: "📚" },
-				{ en: "Chinese", zh: "语文；中文", unit: "unit1", icon: "📚" },
-				{ en: "Maths", zh: "数学", unit: "unit1", icon: "📚" },
-				{ en: "English", zh: "英语", unit: "unit1", icon: "📚" },
-				{ en: "Art", zh: "美术", unit: "unit1", icon: "📚" },
-				{ en: "PE", zh: "体育", unit: "unit1", icon: "📚" },
-				{ en: "Music", zh: "音乐", unit: "unit1", icon: "📚" },
-				{ en: "Science", zh: "科学", unit: "unit1", icon: "📚" },
-				{ en: "lesson", zh: "课", unit: "unit1", icon: "📚" },
-				{ en: "Monday", zh: "星期一", unit: "unit1", icon: "📚" },
-				{ en: "Tuesday", zh: "星期二", unit: "unit1", icon: "📚" },
-				{ en: "Wednesday", zh: "星期三", unit: "unit1", icon: "📚" },
-				{ en: "Thursday", zh: "星期四", unit: "unit1", icon: "📚" },
-				{ en: "Friday", zh: "星期五", unit: "unit1", icon: "📚" },
-				{ en: "week", zh: "星期；周", unit: "unit1", icon: "📚" },
-				{ en: "afternoon", zh: "下午", unit: "unit1", icon: "📚" },
-				{ en: "fun", zh: "有趣的；乐趣", unit: "unit1", icon: "📚" },
-				{ en: "timetable", zh: "课程表", unit: "unit1", icon: "📚" },
-				{ en: "student", zh: "学生", unit: "unit2", icon: "🏫" },
-				{ en: "new", zh: "新的", unit: "unit2", icon: "🏫" },
-				{ en: "show", zh: "带领参观；展示", unit: "unit2", icon: "🏫" },
-				{ en: "around", zh: "周围；到处", unit: "unit2", icon: "🏫" },
-				{ en: "library", zh: "图书馆", unit: "unit2", icon: "🏫" },
-				{ en: "classroom", zh: "教室", unit: "unit2", icon: "🏫" },
-				{ en: "computer room", zh: "电脑室", unit: "unit2", icon: "🏫" },
-				{ en: "music room", zh: "音乐室", unit: "unit2", icon: "🏫" },
-				{ en: "playground", zh: "操场", unit: "unit2", icon: "🏫" },
-				{ en: "first", zh: "第一", unit: "unit2", icon: "🏫" },
-				{ en: "second", zh: "第二", unit: "unit2", icon: "🏫" },
-				{ en: "third", zh: "第三", unit: "unit2", icon: "🏫" },
-				{ en: "floor", zh: "楼层；地板", unit: "unit2", icon: "🏫" },
-				{ en: "swing", zh: "秋千", unit: "unit2", icon: "🏫" },
-				{ en: "push", zh: "推", unit: "unit2", icon: "🏫" },
-				{ en: "heavy", zh: "重的", unit: "unit2", icon: "🏫" },
-				{ en: "stop", zh: "停止", unit: "unit2", icon: "🏫" },
-				{ en: "high", zh: "高的", unit: "unit2", icon: "🏫" },
-				{ en: "animal", zh: "动物", unit: "unit3", icon: "🐾" },
-				{ en: "friend", zh: "朋友", unit: "unit3", icon: "🐾" },
-				{ en: "body", zh: "身体", unit: "unit3", icon: "🐾" },
-				{ en: "tail", zh: "尾巴", unit: "unit3", icon: "🐾" },
-				{ en: "wing", zh: "翅膀", unit: "unit3", icon: "🐾" },
-				{ en: "leg", zh: "腿", unit: "unit3", icon: "🐾" },
-				{ en: "arm", zh: "手臂", unit: "unit3", icon: "🐾" },
-				{ en: "foot", zh: "脚", unit: "unit3", icon: "🐾" },
-				{ en: "finger", zh: "手指", unit: "unit3", icon: "🐾" },
-				{ en: "rabbit", zh: "兔子", unit: "unit3", icon: "🐾" },
-				{ en: "parrot", zh: "鹦鹉", unit: "unit3", icon: "🐾" },
-				{ en: "dog", zh: "狗", unit: "unit3", icon: "🐾" },
-				{ en: "goldfish", zh: "金鱼", unit: "unit3", icon: "🐾" },
-				{ en: "give", zh: "给", unit: "unit3", icon: "🐾" },
-				{ en: "hobby", zh: "爱好", unit: "unit4", icon: "🎨" },
-				{ en: "sing", zh: "唱歌", unit: "unit4", icon: "🎨" },
-				{ en: "dance", zh: "跳舞", unit: "unit4", icon: "🎨" },
-				{ en: "draw", zh: "画画", unit: "unit4", icon: "🎨" },
-				{ en: "read", zh: "阅读", unit: "unit4", icon: "🎨" },
-				{ en: "swim", zh: "游泳", unit: "unit4", icon: "🎨" },
-				{ en: "skate", zh: "滑冰；滑板", unit: "unit4", icon: "🎨" },
-				{ en: "play football", zh: "踢足球", unit: "unit4", icon: "🎨" },
-				{ en: "play basketball", zh: "打篮球", unit: "unit4", icon: "🎨" },
-				{ en: "play the piano", zh: "弹钢琴", unit: "unit4", icon: "🎨" },
-				{ en: "watch films", zh: "看电影", unit: "unit4", icon: "🎨" },
-				{ en: "both", zh: "两者都", unit: "unit4", icon: "🎨" },
-				{ en: "also", zh: "也；还", unit: "unit4", icon: "🎨" },
-				{ en: "idea", zh: "主意；想法", unit: "unit4", icon: "🎨" },
-				{ en: "about", zh: "关于；大约", unit: "unit4", icon: "🎨" }
+				{ en: "habit", zh: "习惯", unit: "unit1", icon: "🧼" },
+				{ en: "good", zh: "好的", unit: "unit1", icon: "🧼" },
+				{ en: "bad", zh: "坏的", unit: "unit1", icon: "🧼" },
+				{ en: "early", zh: "早的；早地", unit: "unit1", icon: "🧼" },
+				{ en: "late", zh: "迟的；晚的", unit: "unit1", icon: "🧼" },
+				{ en: "get up", zh: "起床", unit: "unit1", icon: "🧼" },
+				{ en: "go to bed", zh: "上床睡觉", unit: "unit1", icon: "🧼" },
+				{ en: "brush", zh: "刷", unit: "unit1", icon: "🧼" },
+				{ en: "teeth", zh: "牙齿", unit: "unit1", icon: "🧼" },
+				{ en: "wash", zh: "洗", unit: "unit1", icon: "🧼" },
+				{ en: "face", zh: "脸", unit: "unit1", icon: "🧼" },
+				{ en: "tidy", zh: "整洁的；收拾", unit: "unit1", icon: "🧼", level: "recognition" },
+				{ en: "clean", zh: "干净的；打扫", unit: "unit1", icon: "🧼" },
+				{ en: "dirty", zh: "脏的", unit: "unit1", icon: "🧼" },
+				{ en: "on time", zh: "按时", unit: "unit1", icon: "🧼", level: "recognition" },
+				{ en: "finish", zh: "完成", unit: "unit1", icon: "🧼", level: "recognition" },
+				{ en: "before", zh: "在……之前", unit: "unit1", icon: "🧼" },
+				{ en: "feel", zh: "感觉", unit: "unit2", icon: "😊" },
+				{ en: "happy", zh: "高兴的", unit: "unit2", icon: "😊" },
+				{ en: "sad", zh: "难过的", unit: "unit2", icon: "😊" },
+				{ en: "angry", zh: "生气的", unit: "unit2", icon: "😊" },
+				{ en: "tired", zh: "疲倦的", unit: "unit2", icon: "😊" },
+				{ en: "hungry", zh: "饥饿的", unit: "unit2", icon: "😊" },
+				{ en: "thirsty", zh: "口渴的", unit: "unit2", icon: "😊" },
+				{ en: "ill", zh: "生病的", unit: "unit2", icon: "😊" },
+				{ en: "excited", zh: "兴奋的", unit: "unit2", icon: "😊", level: "recognition" },
+				{ en: "worried", zh: "担心的", unit: "unit2", icon: "😊", level: "recognition" },
+				{ en: "bored", zh: "无聊的", unit: "unit2", icon: "😊", level: "recognition" },
+				{ en: "afraid", zh: "害怕的", unit: "unit2", icon: "😊" },
+				{ en: "better", zh: "更好的", unit: "unit2", icon: "😊" },
+				{ en: "why", zh: "为什么", unit: "unit2", icon: "😊" },
+				{ en: "because", zh: "因为", unit: "unit2", icon: "😊" },
+				{ en: "matter", zh: "事情；问题", unit: "unit2", icon: "😊", level: "recognition" },
+				{ en: "rest", zh: "休息", unit: "unit2", icon: "😊" },
+				{ en: "hobby", zh: "爱好", unit: "unit3", icon: "🎨" },
+				{ en: "collect", zh: "收集", unit: "unit3", icon: "🎨" },
+				{ en: "stamp", zh: "邮票", unit: "unit3", icon: "🎨" },
+				{ en: "photo", zh: "照片", unit: "unit3", icon: "🎨" },
+				{ en: "model", zh: "模型", unit: "unit3", icon: "🎨", level: "recognition" },
+				{ en: "draw", zh: "画画", unit: "unit3", icon: "🎨" },
+				{ en: "paint", zh: "绘画；涂色", unit: "unit3", icon: "🎨", level: "recognition" },
+				{ en: "sing", zh: "唱歌", unit: "unit3", icon: "🎨" },
+				{ en: "dance", zh: "跳舞", unit: "unit3", icon: "🎨" },
+				{ en: "swim", zh: "游泳", unit: "unit3", icon: "🎨" },
+				{ en: "skate", zh: "滑冰", unit: "unit3", icon: "🎨" },
+				{ en: "read", zh: "阅读", unit: "unit3", icon: "🎨" },
+				{ en: "story", zh: "故事", unit: "unit3", icon: "🎨" },
+				{ en: "club", zh: "社团；俱乐部", unit: "unit3", icon: "🎨", level: "recognition" },
+				{ en: "be good at", zh: "擅长", unit: "unit3", icon: "🎨" },
+				{ en: "interesting", zh: "有趣的", unit: "unit3", icon: "🎨", level: "recognition" },
+				{ en: "enjoy", zh: "享受；喜欢", unit: "unit3", icon: "🎨", level: "recognition" },
+				{ en: "safe", zh: "安全的", unit: "unit4", icon: "🚦" },
+				{ en: "safety", zh: "安全", unit: "unit4", icon: "🚦", level: "recognition" },
+				{ en: "dangerous", zh: "危险的", unit: "unit4", icon: "🚦" },
+				{ en: "careful", zh: "小心的", unit: "unit4", icon: "🚦" },
+				{ en: "rule", zh: "规则", unit: "unit4", icon: "🚦" },
+				{ en: "traffic", zh: "交通", unit: "unit4", icon: "🚦" },
+				{ en: "road", zh: "马路", unit: "unit4", icon: "🚦" },
+				{ en: "crossing", zh: "人行横道", unit: "unit4", icon: "🚦", level: "recognition" },
+				{ en: "traffic lights", zh: "红绿灯", unit: "unit4", icon: "🚦" },
+				{ en: "wait", zh: "等待", unit: "unit4", icon: "🚦" },
+				{ en: "cross", zh: "穿过", unit: "unit4", icon: "🚦" },
+				{ en: "hurt", zh: "受伤；伤害", unit: "unit4", icon: "🚦" },
+				{ en: "fall", zh: "跌倒", unit: "unit4", icon: "🚦" },
+				{ en: "stairs", zh: "楼梯", unit: "unit4", icon: "🚦", level: "recognition" },
+				{ en: "helmet", zh: "头盔", unit: "unit4", icon: "🚦", level: "recognition" },
+				{ en: "matches", zh: "火柴", unit: "unit4", icon: "🚦", level: "recognition" },
+				{ en: "knife", zh: "刀", unit: "unit4", icon: "🚦" },
+				{ en: "fire", zh: "火", unit: "unit4", icon: "🚦" },
+				{ en: "weekend", zh: "周末", unit: "unit5", icon: "🌤️" },
+				{ en: "at weekends", zh: "在周末", unit: "unit5", icon: "🌤️" },
+				{ en: "always", zh: "总是", unit: "unit5", icon: "🌤️" },
+				{ en: "usually", zh: "通常", unit: "unit5", icon: "🌤️" },
+				{ en: "often", zh: "经常", unit: "unit5", icon: "🌤️" },
+				{ en: "sometimes", zh: "有时", unit: "unit5", icon: "🌤️" },
+				{ en: "never", zh: "从不", unit: "unit5", icon: "🌤️" },
+				{ en: "seldom", zh: "很少", unit: "unit5", icon: "🌤️", level: "recognition" },
+				{ en: "visit", zh: "拜访", unit: "unit5", icon: "🌤️" },
+				{ en: "grandparent", zh: "祖父母", unit: "unit5", icon: "🌤️" },
+				{ en: "picnic", zh: "野餐", unit: "unit5", icon: "🌤️" },
+				{ en: "housework", zh: "家务", unit: "unit5", icon: "🌤️" },
+				{ en: "shopping", zh: "购物", unit: "unit5", icon: "🌤️" },
+				{ en: "once", zh: "一次", unit: "unit5", icon: "🌤️", level: "recognition" },
+				{ en: "twice", zh: "两次", unit: "unit5", icon: "🌤️", level: "recognition" },
+				{ en: "every", zh: "每一个", unit: "unit5", icon: "🌤️" },
+				{ en: "together", zh: "一起", unit: "unit5", icon: "🌤️" },
+				{ en: "get along with", zh: "与……相处", unit: "unit6", icon: "🤝" },
+				{ en: "friendly", zh: "友好的", unit: "unit6", icon: "🤝" },
+				{ en: "kind", zh: "友善的；种类", unit: "unit6", icon: "🤝" },
+				{ en: "helpful", zh: "有帮助的", unit: "unit6", icon: "🤝" },
+				{ en: "share", zh: "分享", unit: "unit6", icon: "🤝" },
+				{ en: "polite", zh: "有礼貌的", unit: "unit6", icon: "🤝", level: "recognition" },
+				{ en: "rude", zh: "粗鲁的", unit: "unit6", icon: "🤝", level: "recognition" },
+				{ en: "invite", zh: "邀请", unit: "unit6", icon: "🤝" },
+				{ en: "join", zh: "加入", unit: "unit6", icon: "🤝" },
+				{ en: "quarrel", zh: "争吵", unit: "unit6", icon: "🤝", level: "recognition" },
+				{ en: "forgive", zh: "原谅", unit: "unit6", icon: "🤝", level: "recognition" },
+				{ en: "respect", zh: "尊重", unit: "unit6", icon: "🤝", level: "recognition" },
+				{ en: "care", zh: "关心", unit: "unit6", icon: "🤝" },
+				{ en: "listen", zh: "听", unit: "unit6", icon: "🤝" },
+				{ en: "each other", zh: "互相", unit: "unit6", icon: "🤝" },
+				{ en: "make friends", zh: "交朋友", unit: "unit6", icon: "🤝" },
+				{ en: "shop", zh: "商店；购物", unit: "unit7", icon: "🛒" },
+				{ en: "supermarket", zh: "超市", unit: "unit7", icon: "🛒" },
+				{ en: "buy", zh: "买", unit: "unit7", icon: "🛒" },
+				{ en: "sell", zh: "卖", unit: "unit7", icon: "🛒" },
+				{ en: "price", zh: "价格", unit: "unit7", icon: "🛒" },
+				{ en: "cheap", zh: "便宜的", unit: "unit7", icon: "🛒" },
+				{ en: "expensive", zh: "昂贵的", unit: "unit7", icon: "🛒" },
+				{ en: "money", zh: "钱", unit: "unit7", icon: "🛒" },
+				{ en: "yuan", zh: "元", unit: "unit7", icon: "🛒" },
+				{ en: "change", zh: "零钱；改变", unit: "unit7", icon: "🛒", level: "recognition" },
+				{ en: "pay", zh: "付款", unit: "unit7", icon: "🛒" },
+				{ en: "cost", zh: "花费", unit: "unit7", icon: "🛒", level: "recognition" },
+				{ en: "size", zh: "尺码", unit: "unit7", icon: "🛒", level: "recognition" },
+				{ en: "try on", zh: "试穿", unit: "unit7", icon: "🛒" },
+				{ en: "choose", zh: "选择", unit: "unit7", icon: "🛒", level: "recognition" },
+				{ en: "wallet", zh: "钱包", unit: "unit7", icon: "🛒", level: "recognition" },
+				{ en: "festival", zh: "节日", unit: "unit8", icon: "🎉" },
+				{ en: "Spring Festival", zh: "春节", unit: "unit8", icon: "🎉" },
+				{ en: "Mid-Autumn Festival", zh: "中秋节", unit: "unit8", icon: "🎉" },
+				{ en: "Dragon Boat Festival", zh: "端午节", unit: "unit8", icon: "🎉" },
+				{ en: "National Day", zh: "国庆节", unit: "unit8", icon: "🎉" },
+				{ en: "Christmas", zh: "圣诞节", unit: "unit8", icon: "🎉" },
+				{ en: "New Year's Day", zh: "元旦", unit: "unit8", icon: "🎉" },
+				{ en: "Children's Day", zh: "儿童节", unit: "unit8", icon: "🎉" },
+				{ en: "celebrate", zh: "庆祝", unit: "unit8", icon: "🎉", level: "recognition" },
+				{ en: "dumpling", zh: "饺子", unit: "unit8", icon: "🎉" },
+				{ en: "mooncake", zh: "月饼", unit: "unit8", icon: "🎉" },
+				{ en: "rice dumpling", zh: "粽子", unit: "unit8", icon: "🎉" },
+				{ en: "present", zh: "礼物", unit: "unit8", icon: "🎉" },
+				{ en: "lantern", zh: "灯笼", unit: "unit8", icon: "🎉", level: "recognition" },
+				{ en: "firework", zh: "烟花", unit: "unit8", icon: "🎉", level: "recognition" },
+				{ en: "holiday", zh: "假日", unit: "unit8", icon: "🎉" },
+				{ en: "get together", zh: "聚会", unit: "unit8", icon: "🎉" },
 			];
 			const GRAMMAR_QUESTIONS = [
-				{ unit: "unit1", prompt: "What subjects ___ you like?", answer: "do", options: ["do", "does", "is", "are"], explanation: "问对方喜欢什么科目，用 do you like。" },
-				{ unit: "unit1", prompt: "What subjects do you like? — I like ___.", answer: "Science", options: ["Science", "Monday", "classroom", "student"], explanation: "回答喜欢的科目：I like + 科目。" },
-				{ unit: "unit1", prompt: "What ___ do you have this morning?", answer: "lessons", options: ["lessons", "subject", "like", "week"], explanation: "询问今天上午有什么课：What lessons do you have...?" },
-				{ unit: "unit1", prompt: "We ___ English and Maths on Monday.", answer: "have", options: ["have", "has", "is", "likes"], explanation: "主语 we 后用 have，表示“有/上课”。" },
-				{ unit: "unit1", prompt: "Does Mike like Music? — Yes, he ___.", answer: "does", options: ["does", "do", "is", "likes"], explanation: "Does 开头的一般疑问句，肯定回答用 Yes, he does。" },
-				{ unit: "unit1", prompt: "Do you like PE? — No, I ___.", answer: "don't", options: ["don't", "doesn't", "am not", "isn't"], explanation: "Do you...? 的否定回答是 No, I don't。" },
-				{ unit: "unit1", prompt: "What ___ does Yang Ling like?", answer: "subject", options: ["subject", "lessons", "does", "do"], explanation: "询问喜欢哪门科目：What subject does...like?" },
-				{ unit: "unit1", prompt: "It's time ___ Music.", answer: "for", options: ["for", "to", "at", "on"], explanation: "It's time for + 名词，表示“到……的时间了”。" },
-				{ unit: "unit1", prompt: "We have a new subject. ___ is Science.", answer: "It", options: ["It", "They", "We", "There"], explanation: "用 It 指代前面提到的单数事物。" },
-				{ unit: "unit1", prompt: "How many ___ do you have?", answer: "subjects", options: ["subjects", "subject", "Science", "Monday"], explanation: "How many 后接可数名词复数。" },
-				{ unit: "unit2", prompt: "___ there a library in your school?", answer: "Is", options: ["Is", "Are", "Do", "Does"], explanation: "There be 句型的单数一般疑问句用 Is there...?" },
-				{ unit: "unit2", prompt: "There ___ a computer room on the second floor.", answer: "is", options: ["is", "are", "have", "has"], explanation: "a computer room 是单数，There be 用 is。" },
-				{ unit: "unit2", prompt: "There ___ two music rooms in our school.", answer: "are", options: ["are", "is", "has", "does"], explanation: "two music rooms 是复数，There be 用 are。" },
-				{ unit: "unit2", prompt: "Are there ___ swings in the playground?", answer: "any", options: ["any", "some", "a", "an"], explanation: "一般疑问句中通常用 any，询问是否有秋千。" },
-				{ unit: "unit2", prompt: "There are ___ classrooms on this floor.", answer: "some", options: ["some", "any", "a", "an"], explanation: "肯定句表示“有一些”时可用 some。" },
-				{ unit: "unit2", prompt: "How many classrooms ___ there?", answer: "are", options: ["are", "is", "do", "does"], explanation: "classrooms 是复数，问句用 How many ... are there?" },
-				{ unit: "unit2", prompt: "___ there any computer rooms? — Yes, there are.", answer: "Are", options: ["Are", "Is", "Do", "Does"], explanation: "computer rooms 是复数，用 Are there...?" },
-				{ unit: "unit2", prompt: "Is there a music room? — No, there ___.", answer: "isn't", options: ["isn't", "aren't", "don't", "doesn't"], explanation: "Is there...? 的否定回答是 No, there isn't。" },
-				{ unit: "unit2", prompt: "The library is ___ the first floor.", answer: "on", options: ["on", "in", "at", "under"], explanation: "表示在第几层，常用 on the ... floor。" },
-				{ unit: "unit2", prompt: "There ___ a swing and two slides in the playground.", answer: "is", options: ["is", "are", "have", "do"], explanation: "There be 后紧跟的 a swing 是单数，be 动词用 is。" },
-				{ unit: "unit3", prompt: "___ you have an animal friend?", answer: "Do", options: ["Do", "Does", "Are", "Is"], explanation: "主语 you 的一般现在时一般疑问句用 Do 开头。" },
-				{ unit: "unit3", prompt: "Does it have a tail? — Yes, it ___.", answer: "does", options: ["does", "do", "has", "is"], explanation: "Does it...? 的肯定回答是 Yes, it does。" },
-				{ unit: "unit3", prompt: "My dog ___ four legs.", answer: "has", options: ["has", "have", "is", "does"], explanation: "第三人称单数主语 my dog 后用 has。" },
-				{ unit: "unit3", prompt: "The rabbits ___ long ears.", answer: "have", options: ["have", "has", "is", "does"], explanation: "复数主语 the rabbits 后用 have。" },
-				{ unit: "unit3", prompt: "Does your parrot have wings? — No, it ___.", answer: "doesn't", options: ["doesn't", "don't", "isn't", "hasn't"], explanation: "Does your parrot...? 的否定回答是 No, it doesn't。" },
-				{ unit: "unit3", prompt: "What ___ your goldfish have?", answer: "does", options: ["does", "do", "is", "are"], explanation: "主语 your goldfish 是第三人称单数，特殊疑问句用 does。" },
-				{ unit: "unit3", prompt: "It ___ a big body and a long tail.", answer: "has", options: ["has", "have", "is", "does"], explanation: "主语 it 是第三人称单数，陈述句用 has。" },
-				{ unit: "unit3", prompt: "They ___ four legs and a short tail.", answer: "have", options: ["have", "has", "is", "does"], explanation: "主语 they 是复数，陈述句用 have。" },
-				{ unit: "unit3", prompt: "___ it run? — Yes, it can.", answer: "Can", options: ["Can", "Does", "Is", "Has"], explanation: "询问能力用 Can 开头，回答也用 can。" },
-				{ unit: "unit3", prompt: "A parrot can ___ and talk.", answer: "fly", options: ["fly", "flies", "flying", "to flies"], explanation: "情态动词 can 后接动词原形。" },
-				{ unit: "unit4", prompt: "What do you like ___?", answer: "doing", options: ["doing", "do", "does", "did"], explanation: "询问爱好用 What do you like doing?" },
-				{ unit: "unit4", prompt: "I like ___.", answer: "reading", options: ["reading", "read", "reads", "to reading"], explanation: "like 表示喜欢做某事时，可用 like + 动词-ing。" },
-				{ unit: "unit4", prompt: "He likes ___ football after school.", answer: "playing", options: ["playing", "play", "plays", "played"], explanation: "likes 后接动词-ing：likes playing。" },
-				{ unit: "unit4", prompt: "She is good at ___.", answer: "dancing", options: ["dancing", "dance", "dances", "to dance"], explanation: "be good at 后接名词或动词-ing。" },
-				{ unit: "unit4", prompt: "Does Mike like ___ films?", answer: "watching", options: ["watching", "watch", "watches", "watched"], explanation: "Does...like 后的动词用原形；like 后可接 watching。" },
-				{ unit: "unit4", prompt: "Does your sister like singing? — Yes, she ___.", answer: "does", options: ["does", "do", "is", "likes"], explanation: "Does your sister...? 的肯定回答是 Yes, she does。" },
-				{ unit: "unit4", prompt: "Do they like skating? — No, they ___.", answer: "don't", options: ["don't", "doesn't", "aren't", "isn't"], explanation: "Do they...? 的否定回答是 No, they don't。" },
-				{ unit: "unit4", prompt: "What ___ your brother like doing?", answer: "does", options: ["does", "do", "is", "are"], explanation: "your brother 是第三人称单数，问句用 does。" },
-				{ unit: "unit4", prompt: "My hobbies ___ reading and drawing.", answer: "are", options: ["are", "is", "am", "be"], explanation: "hobbies 是复数，be 动词用 are。" },
-				{ unit: "unit4", prompt: "We both like ___.", answer: "singing", options: ["singing", "sing", "sings", "sang"], explanation: "like 后接动词-ing 表示喜欢做某事。" }
+				{ unit: "unit1", prompt: "He ___ up at six every morning.", answer: "gets", options: ["gets", "get", "getting", "got"], explanation: "主语 he 是第三人称单数，动词 get 加 -s 变成 gets。" },
+				{ unit: "unit1", prompt: "My sister ___ her teeth twice a day.", answer: "brushes", options: ["brushes", "brush", "brushs", "brushing"], explanation: "以 sh 结尾的动词，第三人称单数加 -es：brush → brushes。" },
+				{ unit: "unit1", prompt: "Tom ___ to bed at nine o'clock.", answer: "goes", options: ["goes", "go", "gos", "going"], explanation: "go 的第三人称单数形式是 goes。" },
+				{ unit: "unit1", prompt: "___ your brother have a good habit?", answer: "Does", options: ["Does", "Do", "Is", "Are"], explanation: "主语 your brother 是第三人称单数，助动词用 Does。" },
+				{ unit: "unit1", prompt: "What time ___ he go to school?", answer: "does", options: ["does", "do", "is", "are"], explanation: "特殊疑问句中，主语 he 的助动词用 does，后面动词用原形。" },
+				{ unit: "unit1", prompt: "Does Lily get up early? — Yes, she ___.", answer: "does", options: ["does", "do", "is", "has"], explanation: "Does ...? 的肯定回答是 Yes, she does。" },
+				{ unit: "unit1", prompt: "Mike ___ his hands before meals.", answer: "washes", options: ["washes", "wash", "washs", "washing"], explanation: "wash 的第三人称单数形式是 washes。" },
+				{ unit: "unit1", prompt: "My parents ___ early every day.", answer: "get up", options: ["get up", "gets up", "getting up", "got up"], explanation: "主语 my parents 是复数，动词用原形 get up。" },
+				{ unit: "unit1", prompt: "They ___ good habits.", answer: "have", options: ["have", "has", "having", "is"], explanation: "主语 they 是复数，用 have。" },
+				{ unit: "unit1", prompt: "It ___ a good habit to read every day.", answer: "is", options: ["is", "are", "do", "does"], explanation: "It 作主语，be 动词用 is。" },
+				{ unit: "unit2", prompt: "I ___ happy today.", answer: "feel", options: ["feel", "feels", "feeling", "felt"], explanation: "主语 I 后用动词原形 feel。" },
+				{ unit: "unit2", prompt: "She ___ tired after school.", answer: "feels", options: ["feels", "feel", "feeling", "felt"], explanation: "主语 she 是第三人称单数，用 feels。" },
+				{ unit: "unit2", prompt: "Do you feel ___? — Yes, I'm very hungry.", answer: "hungry", options: ["hungry", "happily", "hunger", "hungryly"], explanation: "feel 后接形容词表示感受：feel hungry。" },
+				{ unit: "unit2", prompt: "He looks ___. He wants some water.", answer: "thirsty", options: ["thirsty", "thirst", "thirstily", "thirsting"], explanation: "look 后接形容词：look thirsty。" },
+				{ unit: "unit2", prompt: "I feel ___ because I have no friends here.", answer: "sad", options: ["sad", "sadly", "sadness", "sadder"], explanation: "feel 后接形容词 sad 表示心情。" },
+				{ unit: "unit2", prompt: "The children feel ___ about the trip.", answer: "excited", options: ["excited", "exciting", "excite", "excitedly"], explanation: "人感到兴奋用 excited，修饰事物才用 exciting。" },
+				{ unit: "unit2", prompt: "Why ___ you sad?", answer: "are", options: ["are", "do", "does", "is"], explanation: "Why are you sad? 用 be 动词提问。" },
+				{ unit: "unit2", prompt: "I'm not well. I ___ ill.", answer: "feel", options: ["feel", "feels", "felt", "feeling"], explanation: "主语 I 后用动词原形 feel。" },
+				{ unit: "unit2", prompt: "Does she feel better now? — No, she ___.", answer: "doesn't", options: ["doesn't", "don't", "isn't", "aren't"], explanation: "Does she ...? 的否定回答是 No, she doesn't。" },
+				{ unit: "unit2", prompt: "He feels ___ because he has a lot of homework.", answer: "bored", options: ["bored", "boring", "bore", "boringly"], explanation: "人感到无聊用 bored，boring 表示“令人无聊的”。" },
+				{ unit: "unit3", prompt: "What do you like ___?", answer: "doing", options: ["doing", "do", "does", "did"], explanation: "询问爱好用 What do you like doing?" },
+				{ unit: "unit3", prompt: "I like ___ stamps.", answer: "collecting", options: ["collecting", "collect", "collects", "collected"], explanation: "like 后接动词-ing 表示喜欢做某事。" },
+				{ unit: "unit3", prompt: "She likes ___ pictures.", answer: "drawing", options: ["drawing", "draw", "draws", "drew"], explanation: "likes 后接动词-ing：likes drawing。" },
+				{ unit: "unit3", prompt: "Does he like ___ football?", answer: "playing", options: ["playing", "play", "plays", "played"], explanation: "Does ... like 后面同样用动词-ing。" },
+				{ unit: "unit3", prompt: "My hobby is ___.", answer: "singing", options: ["singing", "sing", "sings", "sang"], explanation: "表示爱好可用动词-ing 作表语。" },
+				{ unit: "unit3", prompt: "___ do you like doing? — I like reading.", answer: "What", options: ["What", "How", "Who", "Where"], explanation: "询问喜欢做什么用 What do you like doing?" },
+				{ unit: "unit3", prompt: "He is good at ___.", answer: "swimming", options: ["swimming", "swim", "swims", "swam"], explanation: "be good at 后接动词-ing。" },
+				{ unit: "unit3", prompt: "I don't like ___ TV. I like reading.", answer: "watching", options: ["watching", "watch", "watches", "watched"], explanation: "don't like 后同样接动词-ing。" },
+				{ unit: "unit3", prompt: "Do you like singing? — Yes, I ___.", answer: "do", options: ["do", "does", "am", "like"], explanation: "Do you ...? 的肯定回答是 Yes, I do。" },
+				{ unit: "unit3", prompt: "Lily likes dancing, but she ___ like singing.", answer: "doesn't", options: ["doesn't", "don't", "isn't", "not"], explanation: "主语 Lily 是第三人称单数，否定用 doesn't。" },
+				{ unit: "unit4", prompt: "You ___ play with fire. It's dangerous.", answer: "shouldn't", options: ["shouldn't", "should", "can", "do"], explanation: "玩火很危险，用 shouldn't 表示“不应该”。" },
+				{ unit: "unit4", prompt: "We ___ wait for the green light.", answer: "should", options: ["should", "shouldn't", "aren't", "doesn't"], explanation: "绿灯行，表示“应该”用 should。" },
+				{ unit: "unit4", prompt: "___ I cross the road here?", answer: "Should", options: ["Should", "Do", "Am", "Are"], explanation: "征求建议用 Should I ...?" },
+				{ unit: "unit4", prompt: "You should ___ careful in the street.", answer: "be", options: ["be", "are", "is", "being"], explanation: "should 后接动词原形，be careful 用 be。" },
+				{ unit: "unit4", prompt: "We shouldn't ___ in the classroom.", answer: "run", options: ["run", "runs", "running", "ran"], explanation: "shouldn't 后接动词原形。" },
+				{ unit: "unit4", prompt: "You ___ wear a helmet when you ride a bike.", answer: "should", options: ["should", "shouldn't", "don't", "aren't"], explanation: "骑车戴头盔是应该做的事，用 should。" },
+				{ unit: "unit4", prompt: "Should we play near the river? — No, we ___.", answer: "shouldn't", options: ["shouldn't", "should", "don't", "aren't"], explanation: "Should we ...? 的否定回答是 No, we shouldn't。" },
+				{ unit: "unit4", prompt: "You should ___ the traffic lights before you cross.", answer: "look at", options: ["look at", "looks at", "looking at", "looked at"], explanation: "should 后接动词原形 look at。" },
+				{ unit: "unit4", prompt: "The knife is sharp. You should ___ it carefully.", answer: "use", options: ["use", "uses", "using", "used"], explanation: "should 后用动词原形。" },
+				{ unit: "unit4", prompt: "We should keep the ___ in our school.", answer: "rules", options: ["rules", "rule", "ruling", "ruled"], explanation: "keep the rules 表示遵守规则，rule 用复数。" },
+				{ unit: "unit5", prompt: "我周末总是去公园：I ___ go to the park at weekends.", answer: "always", options: ["always", "never", "sometimes", "seldom"], explanation: "always 表示“总是”。" },
+				{ unit: "unit5", prompt: "他从不迟到：He is ___ late for school.", answer: "never", options: ["never", "always", "often", "usually"], explanation: "never 表示“从不”。" },
+				{ unit: "unit5", prompt: "我通常七点起床：I ___ get up at seven.", answer: "usually", options: ["usually", "never", "seldom", "sometimes"], explanation: "usually 表示“通常”。" },
+				{ unit: "unit5", prompt: "她有时看电视：She ___ watches TV.", answer: "sometimes", options: ["sometimes", "always", "never", "usually"], explanation: "sometimes 表示“有时”，放在实义动词前。" },
+				{ unit: "unit5", prompt: "我们经常去野餐：We ___ have a picnic.", answer: "often", options: ["often", "never", "seldom", "sometimes"], explanation: "often 表示“经常”。" },
+				{ unit: "unit5", prompt: "— How ___ do you visit your grandparents? — Twice a week.", answer: "often", options: ["often", "many", "much", "long"], explanation: "How often 用来询问频率。" },
+				{ unit: "unit5", prompt: "我一周游泳两次：I go swimming ___ a week.", answer: "twice", options: ["twice", "two", "second", "third"], explanation: "twice a week 表示“一周两次”。" },
+				{ unit: "unit5", prompt: "She ___ eats sweets. She doesn't like them.", answer: "never", options: ["never", "always", "often", "usually"], explanation: "根据后句“她不喜欢”，用 never。" },
+				{ unit: "unit5", prompt: "We usually ___ football at weekends.", answer: "play", options: ["play", "plays", "playing", "played"], explanation: "频度副词不影响动词形式，主语 we 用原形 play。" },
+				{ unit: "unit5", prompt: "他很少迟到：He is ___ late for school.", answer: "seldom", options: ["seldom", "always", "often", "usually"], explanation: "seldom 表示“很少”。" },
+				{ unit: "unit6", prompt: "___ go to the park together!", answer: "Let's", options: ["Let's", "Lets", "Let", "Letting"], explanation: "Let's + 动词原形，表示提出建议。" },
+				{ unit: "unit6", prompt: "Why ___ you ask your teacher for help?", answer: "don't", options: ["don't", "doesn't", "not", "aren't"], explanation: "Why don't you ...? 是常用的建议句型。" },
+				{ unit: "unit6", prompt: "How about ___ basketball after school?", answer: "playing", options: ["playing", "play", "plays", "played"], explanation: "How about 后接动词-ing。" },
+				{ unit: "unit6", prompt: "What about ___ a card for her?", answer: "making", options: ["making", "make", "makes", "made"], explanation: "What about 后接动词-ing。" },
+				{ unit: "unit6", prompt: "You ___ say sorry to your friend.", answer: "should", options: ["should", "shouldn't", "aren't", "don't"], explanation: "表示“应该”做某事用 should。" },
+				{ unit: "unit6", prompt: "___ we share the book?", answer: "Shall", options: ["Shall", "Do", "Are", "Does"], explanation: "Shall we ...? 用来提出建议。" },
+				{ unit: "unit6", prompt: "It's not polite to ___ at others.", answer: "laugh", options: ["laugh", "laughs", "laughing", "laughed"], explanation: "It's + 形容词 + to + 动词原形。" },
+				{ unit: "unit6", prompt: "We should ___ each other.", answer: "help", options: ["help", "helps", "helping", "helped"], explanation: "should 后接动词原形。" },
+				{ unit: "unit6", prompt: "___ be rude to your classmates.", answer: "Don't", options: ["Don't", "Doesn't", "Not", "Aren't"], explanation: "否定祈使句用 Don't + 动词原形。" },
+				{ unit: "unit6", prompt: "Let's ___ friends with the new student.", answer: "make", options: ["make", "makes", "making", "made"], explanation: "Let's 后接动词原形。" },
+				{ unit: "unit7", prompt: "___ is this toy car? — It's twenty yuan.", answer: "How much", options: ["How much", "How many", "How often", "How old"], explanation: "询问价格用 How much。" },
+				{ unit: "unit7", prompt: "How much ___ these apples?", answer: "are", options: ["are", "is", "do", "does"], explanation: "apples 是复数，be 动词用 are。" },
+				{ unit: "unit7", prompt: "How much ___ the T-shirt?", answer: "is", options: ["is", "are", "do", "does"], explanation: "the T-shirt 是单数，be 动词用 is。" },
+				{ unit: "unit7", prompt: "How many ___ do you want?", answer: "books", options: ["books", "book", "money", "water"], explanation: "How many 后接可数名词复数。" },
+				{ unit: "unit7", prompt: "This bag is too ___. I can't buy it.", answer: "expensive", options: ["expensive", "cheap", "nice", "small"], explanation: "太贵买不起，用 expensive。" },
+				{ unit: "unit7", prompt: "The pencil is only one yuan. It's very ___.", answer: "cheap", options: ["cheap", "expensive", "dear", "cost"], explanation: "一元钱很便宜，用 cheap。" },
+				{ unit: "unit7", prompt: "I'd like to try ___ this coat.", answer: "on", options: ["on", "in", "at", "of"], explanation: "try on 表示试穿。" },
+				{ unit: "unit7", prompt: "I have no ___ to buy the book.", answer: "money", options: ["money", "moneys", "monies", "a money"], explanation: "money 是不可数名词，不能加 -s。" },
+				{ unit: "unit7", prompt: "The book ___ me ten yuan.", answer: "costs", options: ["costs", "cost", "costing", "costed"], explanation: "主语 the book 是第三人称单数，用 costs。" },
+				{ unit: "unit7", prompt: "— Can I help you? — I'd like ___ a present for my mum.", answer: "to buy", options: ["to buy", "buy", "buying", "buys"], explanation: "would like to do sth. 表示“想要做某事”。" },
+				{ unit: "unit8", prompt: "Spring Festival is ___ January or February.", answer: "in", options: ["in", "on", "at", "for"], explanation: "月份前用 in。" },
+				{ unit: "unit8", prompt: "My birthday is ___ May 1st.", answer: "on", options: ["on", "in", "at", "for"], explanation: "具体日期前用 on。" },
+				{ unit: "unit8", prompt: "We get presents ___ Christmas.", answer: "at", options: ["at", "in", "on", "for"], explanation: "节日名称前常用 at：at Christmas。" },
+				{ unit: "unit8", prompt: "Children's Day is ___ June 1st.", answer: "on", options: ["on", "in", "at", "of"], explanation: "具体日期前用 on。" },
+				{ unit: "unit8", prompt: "___ Mid-Autumn Festival, we eat mooncakes.", answer: "At", options: ["At", "In", "On", "For"], explanation: "节日名称前常用 at：At Mid-Autumn Festival。" },
+				{ unit: "unit8", prompt: "We go to school ___ Monday.", answer: "on", options: ["on", "in", "at", "to"], explanation: "星期前用 on。" },
+				{ unit: "unit8", prompt: "The party starts ___ seven o'clock.", answer: "at", options: ["at", "in", "on", "for"], explanation: "具体钟点前用 at。" },
+				{ unit: "unit8", prompt: "It often rains ___ spring.", answer: "in", options: ["in", "on", "at", "for"], explanation: "季节前用 in。" },
+				{ unit: "unit8", prompt: "___ Sunday morning, we visit our grandparents.", answer: "On", options: ["On", "In", "At", "For"], explanation: "具体到某天的上午用 on。" },
+				{ unit: "unit8", prompt: "We stay at home ___ night.", answer: "at", options: ["at", "in", "on", "for"], explanation: "at night 是固定搭配。" },
 			];
 			const QUESTION_COUNT = 10;
 			const STORAGE_KEY = "word-adventure-mistakes-v1";
-			const state = { exercise: "words", mode: "en-zh", category: "all", questions: [], index: 0, roundCount: QUESTION_COUNT, score: 0, correct: 0, streak: 0, answered: false, mistakes: [] };
+			const CATEGORY_UNITS = {
+				unit1: ["unit1"],
+				unit2: ["unit2"],
+				unit3: ["unit3"],
+				unit4: ["unit4"],
+				unit5: ["unit5"],
+				unit6: ["unit6"],
+				unit7: ["unit7"],
+				unit8: ["unit8"],
+				midterm: ["unit1", "unit2", "unit3", "unit4"],
+				final: ["unit1", "unit2", "unit3", "unit4", "unit5", "unit6", "unit7", "unit8"]
+			};
+			const UNIT_LABELS = {
+				unit1: "U1 Good habits",
+				unit2: "U2 I feel good",
+				unit3: "U3 Hobbies",
+				unit4: "U4 Safety first",
+				unit5: "U5 At weekends",
+				unit6: "U6 Getting along with others",
+				unit7: "U7 Shopping smart",
+				unit8: "U8 We love festivals"
+			};
+			const state = { exercise: "words", mode: "en-zh", category: "all", questions: [], index: 0, roundCount: QUESTION_COUNT, score: 0, correct: 0, streak: 0, answered: false, mistakes: [], dictation: false, unitStats: {} };
 			const quizScreen = document.querySelector("#quiz-screen");
 			const mistakeScreen = document.querySelector("#mistake-screen");
 			const resultScreen = document.querySelector("#result-screen");
@@ -592,6 +777,9 @@
 			const languageSwitch = document.querySelector("#language-switch");
 			const mistakeCount = document.querySelector("#mistake-count");
 			const storageNotice = document.querySelector("#storage-notice");
+			const reasonPicker = document.querySelector("#reason-picker");
+			let pendingReasonEntry = null;
+			let pendingReasonBase = "";
 
 			function questionKey(type, question) {
 				return type === "words"
@@ -635,7 +823,8 @@
 							type: entry.type,
 							question,
 							wrongCount: entry.wrongCount,
-							lastWrongAt: typeof entry.lastWrongAt === "string" ? entry.lastWrongAt : ""
+							lastWrongAt: typeof entry.lastWrongAt === "string" ? entry.lastWrongAt : "",
+							reason: typeof entry.reason === "string" ? entry.reason : ""
 						}] : [];
 					});
 					const uniqueEntries = new Map();
@@ -707,10 +896,16 @@
 					const details = document.createElement("p");
 					if (entry.type === "words") {
 						title.textContent = state.mode === "en-zh" ? `${entry.question.en} — ${entry.question.zh}` : `${entry.question.zh} — ${entry.question.en}`;
-						details.textContent = `词汇 · Unit ${entry.question.unit.slice(-1)} · 错过 ${entry.wrongCount} 次`;
+						details.textContent = `词汇 · Unit ${entry.question.unit.slice(-1)}${entry.question.level === "recognition" ? " · 三会" : ""} · 错过 ${entry.wrongCount} 次`;
 					} else {
 						title.textContent = entry.question.prompt;
 						details.textContent = `语法 · Unit ${entry.question.unit.slice(-1)} · 答案：${entry.question.answer} · 错过 ${entry.wrongCount} 次`;
+					}
+					if (entry.reason) {
+						const reasonTag = document.createElement("span");
+						reasonTag.className = "reason-tag";
+						reasonTag.textContent = `错因：${entry.reason}`;
+						details.append(reasonTag);
 					}
 					item.append(title, details);
 					list.append(item);
@@ -721,7 +916,91 @@
 				quizScreen.hidden = true;
 				mistakeScreen.hidden = false;
 				resultScreen.hidden = true;
+				hideReasonPicker();
 				renderMistakeBook();
+			}
+
+			function recordUnitResult(unit, isCorrect) {
+				if (!unit) return;
+				if (!state.unitStats[unit]) state.unitStats[unit] = { correct: 0, total: 0 };
+				state.unitStats[unit].total += 1;
+				if (isCorrect) state.unitStats[unit].correct += 1;
+			}
+
+			function renderWeakUnits() {
+				const container = document.querySelector("#weak-units");
+				const stats = Object.entries(state.unitStats)
+					.map(([unit, stat]) => ({ unit, correct: stat.correct, total: stat.total, rate: stat.total ? stat.correct / stat.total : 0 }))
+					.filter((item) => item.total > 0);
+				container.replaceChildren();
+				if (!stats.length) {
+					container.hidden = true;
+					return;
+				}
+				const weakest = stats
+					.filter((item) => item.rate < 1)
+					.sort((a, b) => a.rate - b.rate || b.total - a.total)
+					.slice(0, 2);
+				const heading = document.createElement("strong");
+				heading.textContent = weakest.length ? "📌 最需要复习的单元" : "🎯 本轮全对，没有薄弱单元";
+				container.append(heading);
+				if (weakest.length) {
+					const list = document.createElement("ul");
+					weakest.forEach((item) => {
+						const row = document.createElement("li");
+						row.textContent = `${UNIT_LABELS[item.unit] || item.unit} · 正确率 ${Math.round(item.rate * 100)}%（${item.correct}/${item.total}）`;
+						list.append(row);
+					});
+					container.append(list);
+				}
+				container.hidden = false;
+			}
+
+			function showReasonPicker(entry) {
+				pendingReasonEntry = entry;
+				pendingReasonBase = feedback.textContent;
+				document.querySelectorAll(".reason-button").forEach((button) => {
+					button.setAttribute("aria-pressed", "false");
+				});
+				reasonPicker.hidden = false;
+			}
+
+			function hideReasonPicker() {
+				pendingReasonEntry = null;
+				pendingReasonBase = "";
+				if (reasonPicker) reasonPicker.hidden = true;
+			}
+
+			function setMistakeReason(type, question, reason) {
+				const id = questionKey(type, question);
+				const entry = state.mistakes.find((item) => item.id === id);
+				if (!entry) return;
+				entry.reason = reason;
+				persistMistakes();
+			}
+
+			function normalizeSpelling(value) {
+				return value.trim().toLocaleLowerCase().replace(/\s+/g, " ");
+			}
+
+			function submitDictation(event) {
+				event.preventDefault();
+				if (state.answered) return;
+				const entry = state.questions[state.index];
+				if (!entry || entry.type !== "words") return;
+				const input = document.querySelector("#dictation-input");
+				if (!input.value.trim()) {
+					feedback.textContent = "先写下你的答案，再按回车提交。";
+					feedback.dataset.state = "idle";
+					input.focus();
+					return;
+				}
+				const isCorrect = normalizeSpelling(input.value) === normalizeSpelling(entry.question.en);
+				const proxyButton = document.createElement("button");
+				proxyButton.type = "button";
+				chooseAnswer(proxyButton, isCorrect, entry);
+				input.disabled = true;
+				document.querySelector("#dictation-submit").disabled = true;
 			}
 
 			function shuffle(items) {
@@ -738,7 +1017,8 @@
 					return shuffle(state.mistakes).map((entry) => ({ type: entry.type, question: entry.question }));
 				}
 				const source = state.exercise === "words" ? WORDS : GRAMMAR_QUESTIONS;
-				return state.category === "all" ? source : source.filter((question) => question.unit === state.category);
+				const units = CATEGORY_UNITS[state.category];
+				return !units ? source : source.filter((question) => units.includes(question.unit));
 			}
 
 			function startGame() {
@@ -748,7 +1028,7 @@
 					return;
 				}
 				if (state.exercise !== "mistakes" && pool.length < QUESTION_COUNT) {
-					feedback.textContent = "这个单元的题目还不够多，请选择 Unit 1–4 综合。";
+					feedback.textContent = "这个单元的题目还不够多，请选择全册综合。";
 					return;
 				}
 				state.roundCount = Math.min(QUESTION_COUNT, pool.length);
@@ -760,12 +1040,14 @@
 				state.correct = 0;
 				state.streak = 0;
 				state.answered = false;
+				state.unitStats = {};
+				hideReasonPicker();
 				document.querySelector("#score").textContent = "0";
 				document.querySelector("#round-size-label").textContent = `本轮 ${state.roundCount} 题`;
 				quizScreen.hidden = false;
 				mistakeScreen.hidden = true;
 				resultScreen.hidden = true;
-				languageSwitch.hidden = state.exercise !== "words" && state.exercise !== "mistakes";
+				languageSwitch.hidden = state.dictation || (state.exercise !== "words" && state.exercise !== "mistakes");
 				document.querySelector("#category-select").parentElement.hidden = state.exercise === "mistakes";
 				renderQuestion();
 			}
@@ -775,21 +1057,29 @@
 				const question = entry.question;
 				const isVocabulary = entry.type === "words";
 				const isEnglishPrompt = state.mode === "en-zh";
+				const useDictation = state.dictation && isVocabulary;
+				hideReasonPicker();
 				document.querySelector("#round-label").textContent = `第 ${state.index + 1} 题 · 共 ${state.roundCount} 题`;
 				document.querySelector("#streak-label").textContent = `🔥 连对 ${state.streak} 题`;
 				document.querySelector("#question-label").textContent = isVocabulary
-					? isEnglishPrompt ? "这个单词是什么意思？" : "这个中文怎么说？"
+					? useDictation ? "听写时间 · 这个中文怎么拼？" : isEnglishPrompt ? "这个单词是什么意思？" : "这个中文怎么说？"
 					: `${state.exercise === "mistakes" ? "错题复习" : "语法小挑战"} · Unit ${question.unit.slice(-1)}`;
 				const questionWord = document.querySelector("#question-word");
 				questionWord.textContent = isVocabulary
-					? isEnglishPrompt ? question.en : question.zh
+					? useDictation || !isEnglishPrompt ? question.zh : question.en
 					: question.prompt;
 				document.querySelector("#question-hint").textContent = isVocabulary
-					? isEnglishPrompt ? "选择正确的中文意思" : "选择正确的英文单词"
+					? useDictation ? "写出英文，按回车提交，拼写要完全正确" : isEnglishPrompt ? "选择正确的中文意思" : "选择正确的英文单词"
 					: "选择正确的单词或句子";
 				questionWord.dataset.type = isVocabulary ? "vocabulary" : "grammar";
 				document.querySelector("#category-emoji").textContent = isVocabulary ? question.icon : "✏️";
-				speakButton.hidden = !isVocabulary || !("speechSynthesis" in window);
+				speakButton.hidden = !isVocabulary || useDictation || !("speechSynthesis" in window);
+				const dictationInput = document.querySelector("#dictation-input");
+				optionsElement.hidden = useDictation;
+				document.querySelector("#dictation-form").hidden = !useDictation;
+				dictationInput.value = "";
+				dictationInput.disabled = false;
+				document.querySelector("#dictation-submit").disabled = false;
 				feedback.textContent = "选一个你觉得正确的答案吧！";
 				feedback.dataset.state = "idle";
 				nextButton.hidden = true;
@@ -798,10 +1088,13 @@
 				document.querySelector("#progress-fill").style.width = `${(state.index / state.roundCount) * 100}%`;
 
 				const answer = isVocabulary ? isEnglishPrompt ? question.zh : question.en : question.answer;
+				const distractorPool = WORDS.filter((candidate) => candidate.en !== question.en);
+				const sameUnit = distractorPool.filter((candidate) => candidate.unit === question.unit);
+				const distractorSource = sameUnit.length >= 3 ? sameUnit : distractorPool;
 				const choices = isVocabulary
 					? shuffle([
 						{ text: answer, correct: true },
-						...shuffle(WORDS.filter((candidate) => candidate.en !== question.en)).slice(0, 3)
+						...shuffle(distractorSource).slice(0, 3)
 							.map((candidate) => ({ text: isEnglishPrompt ? candidate.zh : candidate.en, correct: false }))
 					])
 					: shuffle(question.options.map((text) => ({ text, correct: text === answer })));
@@ -814,6 +1107,7 @@
 					button.addEventListener("click", () => chooseAnswer(button, choice.correct, entry));
 					optionsElement.append(button);
 				});
+				if (useDictation) dictationInput.focus();
 			}
 
 			function chooseAnswer(selectedButton, isCorrect, entry) {
@@ -821,10 +1115,11 @@
 				state.answered = true;
 				const question = entry.question;
 				const isVocabulary = entry.type === "words";
+				recordUnitResult(question.unit, isCorrect);
 				const buttons = [...optionsElement.querySelectorAll("button")];
 				buttons.forEach((button) => { button.disabled = true; });
 				const answer = isVocabulary
-					? state.mode === "en-zh" ? question.zh : question.en
+					? state.dictation ? question.en : state.mode === "en-zh" ? question.zh : question.en
 					: question.answer;
 				const correctButton = buttons.find((button) => button.textContent === answer);
 				if (correctButton) correctButton.classList.add("correct");
@@ -848,6 +1143,7 @@
 						: `差一点点！正确答案：${answer}。${question.explanation}`;
 					feedback.dataset.state = "incorrect";
 					recordMistake(entry.type, question);
+					showReasonPicker(entry);
 				}
 
 				nextButton.textContent = state.index === state.roundCount - 1 ? "查看成绩 →" : "下一题 →";
@@ -882,6 +1178,7 @@
 					document.querySelector("#result-title").textContent = state.mistakes.length ? "错题复习完成！" : "错题清零，太棒了！";
 					document.querySelector("#result-copy").textContent = `本轮答对 ${correctCount} 题，错题本还剩 ${state.mistakes.length} 题。`;
 				}
+				renderWeakUnits();
 			}
 
 			speakButton.addEventListener("click", () => {
@@ -946,6 +1243,24 @@
 				state.category = "all";
 				document.querySelector("#category-select").value = "all";
 				startGame();
+			});
+
+			document.querySelector("#dictation-button").addEventListener("click", (event) => {
+				state.dictation = !state.dictation;
+				event.currentTarget.setAttribute("aria-pressed", String(state.dictation));
+				startGame();
+			});
+			document.querySelector("#dictation-form").addEventListener("submit", submitDictation);
+			document.querySelectorAll(".reason-button").forEach((button) => {
+				button.addEventListener("click", () => {
+					if (!pendingReasonEntry || reasonPicker.hidden) return;
+					const reason = button.dataset.reason;
+					setMistakeReason(pendingReasonEntry.type, pendingReasonEntry.question, reason);
+					document.querySelectorAll(".reason-button").forEach((item) => {
+						item.setAttribute("aria-pressed", String(item === button));
+					});
+					feedback.textContent = `${pendingReasonBase} 已记下错因：${reason}`;
+				});
 			});
 
 			loadMistakes();

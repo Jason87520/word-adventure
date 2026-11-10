@@ -1,0 +1,31 @@
+# 依赖与构建
+node_modules/
+dist/
+build/
+.next/
+out/
+target/
+*.egg-info/
+.venv/
+venv/
+env/
+
+# 版本控制与缓存
+.git/
+.pytest_cache/
+.mypy_cache/
+__pycache__/
+*.pyc
+
+# 日志与锁文件
+*.log
+*.lock
+coverage/
+htmlcov/
+
+# IDE 配置
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
